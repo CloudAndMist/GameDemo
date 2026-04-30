@@ -1,0 +1,22 @@
+
+module GD
+{
+
+struct PlayerInfo
+{
+    0 require long playerId;
+    1 require string openId;
+    2 require float x;
+    3 require float y;
+    4 require long enterTime;
+};
+
+interface GameServant
+{
+    int login(string openId, out long sessionId, out long playerId);
+    int move(long sessionId, float x, float y);
+    int enterScene(long sessionId, out long playerId, out PlayerInfo self, out vector<PlayerInfo> players);
+    int logout(long sessionId);
+};
+
+};
