@@ -1,0 +1,118 @@
+// ========== Lobby.tars ==========
+// LobbyServer 大厅服务接口
+// 整合账号相关功能
+
+#include "GameDemoBase.tars"
+
+module GameDemo
+{
+    // ========== 请求/响应结构 ==========
+
+    // 登录请求
+    struct LoginReq
+    {
+        0 require string qqNumber;
+        1 require string password;
+    };
+
+    // 登录响应
+    struct LoginRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional long accountId;
+        3 optional long playerId;
+        4 optional string qqNumber;
+    };
+
+    // 注册请求
+    struct RegisterReq
+    {
+        0 require string qqNumber;
+        1 require string password;
+    };
+
+    // 注册响应
+    struct RegisterRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional long accountId;
+    };
+
+    // 创建角色请求
+    struct CreateRoleReq
+    {
+        0 require long accountId;
+        1 require string roleName;
+        2 require int job;
+    };
+
+    // 创建角色响应
+    struct CreateRoleRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional RoleInfo role;
+        3 optional long playerId;
+    };
+
+    // 获取角色列表请求
+    struct GetRoleListReq
+    {
+        0 require long accountId;
+    };
+
+    // 获取角色列表响应
+    struct GetRoleListRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional vector<RoleInfo> roles;
+    };
+
+    // 选择角色请求
+    struct SelectRoleReq
+    {
+        0 require long accountId;
+        1 require long roleId;
+    };
+
+    // 选择角色响应
+    struct SelectRoleRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional long playerId;
+        3 optional RoleInfo role;
+    };
+
+    // 心跳请求
+    struct HeartBeatReq
+    {
+        0 require long playerId;
+    };
+
+    // ========== Lobby 服务接口 ==========
+
+    interface LobbyServant
+    {
+        // 登录
+        int login(LoginReq req, out LoginRsp rsp);
+
+        // 注册账号
+        int registerAccount(RegisterReq req, out RegisterRsp rsp);
+
+        // 创建角色
+        int createRole(CreateRoleReq req, out CreateRoleRsp rsp);
+
+        // 获取角色列表
+        int getRoleList(GetRoleListReq req, out GetRoleListRsp rsp);
+
+        // 选择角色
+        int selectRole(SelectRoleReq req, out SelectRoleRsp rsp);
+
+        // 心跳
+        int heartbeat(HeartBeatReq req);
+    };
+};

@@ -1,0 +1,78 @@
+// ========== Scene.tars ==========
+// SceneServer 场景服务接口
+
+#include "GameDemoBase.tars"
+
+module GameDemo
+{
+    // 进入场景请求
+    struct EnterSceneReq
+    {
+        0 require long playerId;
+        1 require int sceneId;
+    };
+
+    // 进入场景响应
+    struct EnterSceneRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional PlayerInfo self;
+        3 optional vector<PlayerInfo> players;
+    };
+
+    // 移动请求
+    struct MoveReq
+    {
+        0 require long playerId;
+        1 require float x;
+        2 require float y;
+        3 require float z;
+    };
+
+    // 移动响应
+    struct MoveRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+    };
+
+    // 心跳请求
+    struct HeartBeatReq
+    {
+        0 require long playerId;
+    };
+
+    // 获取场景玩家响应
+    struct GetScenePlayersRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional vector<PlayerInfo> players;
+    };
+
+    // SceneServer → LobbyServer 回调接口
+    interface SceneCallback
+    {
+        int onPlayerEnter(out PlayerInfo player);
+        int onPlayerLeave(out long playerId);
+        int onPlayerMove(out PlayerMoveNotify notify);
+        int onSyncRequest(out int sceneId);
+    };
+
+    // 场景服务接口
+    interface SceneServant
+    {
+        // 进入场景
+        int enterScene(EnterSceneReq req, out EnterSceneRsp rsp);
+
+        // 移动
+        int move(MoveReq req, out MoveRsp rsp);
+
+        // 心跳
+        int heartbeat(HeartBeatReq req);
+
+        // 获取场景玩家列表
+        int getScenePlayers(long playerId, int sceneId, out GetScenePlayersRsp rsp);
+    };
+};

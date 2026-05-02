@@ -57,7 +57,7 @@ CMakeLists规范如引用其它tars服务或lib库见：[docs](https://doc.tarsy
 
 ```bash
 cd /workspace/server/***Server/build
-cmake .. -DTARS_WEB_HOST=http://tars-framework:3000 -DTARS_TOKEN=${TOKEN}
+cmake .. -DTARS_WEB_HOST=http://tars-framework:3000 -DTARS_TOKEN=${TARS_TOKEN}
 make -j4
 ```
 

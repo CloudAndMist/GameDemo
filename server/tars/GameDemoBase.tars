@@ -1,0 +1,65 @@
+// ========== GameDemoBase.tars ==========
+// 公共基础协议，所有服务共用
+
+module GameDemo {
+
+    // 通用错误码
+    enum ErrorCode {
+        SUCCESS = 0,
+        ERR_ACCOUNT_NOT_FOUND = 1001,
+        ERR_PASSWORD_WRONG = 1002,
+        ERR_ROLE_NOT_FOUND = 2001,
+        ERR_SCENE_NOT_FOUND = 3001,
+        ERR_SERVER_BUSY = 9999,
+    };
+
+    // 玩家基础信息
+    struct PlayerInfo {
+        0 require long playerId;
+        1 require string openId;
+        2 require string roleName;
+        3 require int level;
+        4 require float x;
+        5 require float y;
+        6 require float z;
+        7 require int sceneId;
+    };
+
+    // 场景信息
+    struct SceneInfo {
+        0 require int sceneId;
+        1 require string sceneName;
+        2 require int playerCount;
+        3 require int maxPlayer;
+    };
+
+    // 移动通知
+    struct PlayerMoveNotify {
+        0 require long playerId;
+        1 require float x;
+        2 require float y;
+        3 require float z;
+        4 require long timestamp;
+    };
+
+    // 玩家进入通知
+    struct PlayerEnterNotify {
+        0 require PlayerInfo player;
+        1 require long timestamp;
+    };
+
+    // 玩家离开通知
+    struct PlayerLeaveNotify {
+        0 require long playerId;
+        1 require long timestamp;
+    };
+
+    // 角色信息
+    struct RoleInfo {
+        0 require long roleId;
+        1 require string roleName;
+        2 require int level;
+        3 require int sceneId;
+    };
+
+};

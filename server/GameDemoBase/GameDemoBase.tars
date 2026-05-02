@@ -1,0 +1,108 @@
+// ========== GameDemoBase.tars ==========
+// 游戏演示基础协议，所有服务共用
+
+module GameDemo
+{
+    // ========== 通用错误码 ==========
+    const int SUCC = 0;
+    const int ERR_ACCOUNT_EXISTS = 1001;
+    const int ERR_ACCOUNT_NOT_EXISTS = 1002;
+    const int ERR_PASSWORD_MISMATCH = 1003;
+    const int ERR_ROLE_EXISTS = 2001;
+    const int ERR_ROLE_NOT_EXISTS = 2002;
+    const int ERR_DB_ERROR = 5001;
+    const int ERR_SERVER_BUSY = 9999;
+
+    // ========== 账号信息 ==========
+    struct AccountInfo
+    {
+        0 require long id;
+        1 require string qqNumber;
+        2 require string password;
+        3 require long createTime;
+    };
+
+    // ========== 角色信息 (完整版) ==========
+    struct RoleInfo
+    {
+        0 require long id;
+        1 require long accountId;
+        2 require string roleName;
+        3 require int job;
+        4 require int level;
+        5 require int hp;
+        6 require int mp;
+        7 require long exp;
+        8 require float x;
+        9 require float y;
+        10 require int sceneId;
+        11 require long createTime;
+        12 require long lastLoginTime;
+    };
+
+    // ========== 玩家基础信息 (简化版) ==========
+    struct PlayerInfo
+    {
+        0 require long playerId;
+        1 require string openId;
+        2 require string roleName;
+        3 require int level;
+        4 require float x;
+        5 require float y;
+        6 require float z;
+        7 require int sceneId;
+    };
+
+    // ========== 场景信息 ==========
+    struct SceneInfo
+    {
+        0 require int sceneId;
+        1 require string sceneName;
+        2 require int playerCount;
+        3 require int maxPlayer;
+    };
+
+    // ========== 移动通知 ==========
+    struct PlayerMoveNotify
+    {
+        0 require long playerId;
+        1 require float x;
+        2 require float y;
+        3 require float z;
+        4 require long timestamp;
+    };
+
+    // ========== 玩家进入通知 ==========
+    struct PlayerEnterNotify
+    {
+        0 require PlayerInfo player;
+        1 require long timestamp;
+    };
+
+    // ========== 玩家离开通知 ==========
+    struct PlayerLeaveNotify
+    {
+        0 require long playerId;
+        1 require long timestamp;
+    };
+
+    // ========== 聊天消息 ==========
+    struct ChatMessage
+    {
+        0 require long senderId;
+        1 require string senderName;
+        2 require string content;
+        3 require int channel;       // 0:世界 1:队伍 2:公会 3:私聊
+        4 require long timestamp;
+    };
+
+    // ========== 技能效果 ==========
+    struct SkillEffect
+    {
+        0 require long casterId;
+        1 require long targetId;
+        2 require int skillId;
+        3 require int damage;
+        4 require int effectType;    // 0:伤害 1:治疗 2:Buff 3:Debuff
+    };
+};
