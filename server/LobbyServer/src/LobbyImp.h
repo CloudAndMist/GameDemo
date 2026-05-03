@@ -54,21 +54,8 @@ public:
     virtual tars::Int32 registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _current_);
 
 private:
-    // 推送管理
-    void addScenePlayer(tars::Int32 sceneId, tars::Int64 playerId);
-    void removeScenePlayer(tars::Int32 sceneId, tars::Int64 playerId);
-    void pushToScenePlayers(tars::Int32 sceneId, const std::function<void(tars::TarsCurrentPtr)>& callback);
-    void broadcastPlayerEnter(tars::Int32 sceneId, tars::Int64 playerId, const GameDemo::PlayerInfo& player);
-    void broadcastPlayerMove(tars::Int32 sceneId, tars::Int64 playerId, tars::Float x, tars::Float y, tars::Float z);
-    void broadcastPlayerLeave(tars::Int32 sceneId, tars::Int64 playerId);
     GameDemo::DBServantPrx _dbPrx;
     GameDemo::SceneServantPrx _scenePrx;
-
-    // 玩家连接映射: playerId -> CurrentPtr (用于推送)
-    std::map<tars::Int64, tars::TarsCurrentPtr> _playerCurrents;
-    // 场景玩家映射: sceneId -> set<playerId>
-    std::map<tars::Int32, std::set<tars::Int64>> _scenePlayers;
-    std::mutex _pushMutex;
 };
 
 // Scene2LobbyPush 实现 (供 SceneServer 调用)

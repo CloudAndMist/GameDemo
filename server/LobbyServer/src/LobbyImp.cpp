@@ -9,7 +9,7 @@ using namespace GameDemo;
 
 extern LobbyServerApp g_app;
 
-/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 tars::Int32 LobbyImp::onConnect(tars::Int64 connId, tars::TarsCurrentPtr _current_)
 {
     TLOG_DEBUG("LobbyImp::onConnect connId=" << connId << endl);
@@ -241,7 +241,7 @@ tars::Int32 LobbyImp::heartbeat(const HeartBeatReq &req, tars::TarsCurrentPtr _c
     return 0;
 }
 
-/////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
 // 进入场景 (转发给 SceneServer)
 tars::Int32 LobbyImp::enterScene(tars::Int64 playerId, tars::Int32 sceneId, EnterSceneRsp &rsp, tars::TarsCurrentPtr _current_)
 {
@@ -352,10 +352,6 @@ tars::Int32 LobbyImp::leaveScene(tars::Int64 playerId, tars::Int32 sceneId, Leav
     }
 }
 
-///////////////////////////////////////////////////////////
-// 推送管理实现
-///////////////////////////////////////////////////////////
-
 // 注册推送 (客户端主动调用)
 tars::Int32 LobbyImp::registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _current_)
 {
@@ -368,104 +364,8 @@ tars::Int32 LobbyImp::registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _c
     return 0;
 }
 
-// 添加场景玩家
-void LobbyImp::addScenePlayer(tars::Int32 sceneId, tars::Int64 playerId)
-{
-    lock_guard<mutex> lock(_pushMutex);
-    _scenePlayers[sceneId].insert(playerId);
-    TLOG_DEBUG("addScenePlayer sceneId=" << sceneId << ", playerId=" << playerId << endl);
-}
-
-// 移除场景玩家
-void LobbyImp::removeScenePlayer(tars::Int32 sceneId, tars::Int64 playerId)
-{
-    lock_guard<mutex> lock(_pushMutex);
-    auto it = _scenePlayers.find(sceneId);
-    if (it != _scenePlayers.end())
-    {
-        it->second.erase(playerId);
-        if (it->second.empty())
-        {
-            _scenePlayers.erase(it);
-        }
-    }
-    TLOG_DEBUG("removeScenePlayer sceneId=" << sceneId << ", playerId=" << playerId << endl);
-}
-
-// 向场景内所有玩家发送推送
-void LobbyImp::pushToScenePlayers(tars::Int32 sceneId, const std::function<void(tars::TarsCurrentPtr)>& callback)
-{
-    lock_guard<mutex> lock(_pushMutex);
-    auto it = _scenePlayers.find(sceneId);
-    if (it == _scenePlayers.end())
-    {
-        return;
-    }
-
-    for (tars::Int64 playerId : it->second)
-    {
-        auto cit = _playerCurrents.find(playerId);
-        if (cit != _playerCurrents.end() && cit->second)
-        {
-            try
-            {
-                callback(cit->second);
-            }
-            catch (const std::exception& e)
-            {
-                TLOG_ERROR("pushToScenePlayers failed for playerId=" << playerId << ": " << e.what() << endl);
-            }
-        }
-    }
-}
-
-// 广播玩家进入场景
-void LobbyImp::broadcastPlayerEnter(tars::Int32 sceneId, tars::Int64 playerId, const PlayerInfo& player)
-{
-    TLOG_INFO("broadcastPlayerEnter sceneId=" << sceneId << ", playerId=" << playerId << ", name=" << player.roleName << endl);
-
-    PlayerEnterNotify notify;
-    notify.player = player;
-    notify.timestamp = TNOW;
-
-    pushToScenePlayers(sceneId, [&playerId, &notify](tars::TarsCurrentPtr current) {
-        Lobby2ClientPush::async_response_push_onPlayerEnter(current, 0, notify);
-    });
-}
-
-// 广播玩家移动
-void LobbyImp::broadcastPlayerMove(tars::Int32 sceneId, tars::Int64 playerId, tars::Float x, tars::Float y, tars::Float z)
-{
-    TLOG_INFO("broadcastPlayerMove sceneId=" << sceneId << ", playerId=" << playerId << ", pos=(" << x << "," << y << "," << z << ")" << endl);
-
-    PlayerMoveNotify notify;
-    notify.playerId = playerId;
-    notify.x = x;
-    notify.y = y;
-    notify.z = z;
-    notify.timestamp = TNOW;
-
-    pushToScenePlayers(sceneId, [&playerId, &notify](tars::TarsCurrentPtr current) {
-        Lobby2ClientPush::async_response_push_onPlayerMove(current, 0, notify);
-    });
-}
-
-// 广播玩家离开场景
-void LobbyImp::broadcastPlayerLeave(tars::Int32 sceneId, tars::Int64 playerId)
-{
-    TLOG_INFO("broadcastPlayerLeave sceneId=" << sceneId << ", playerId=" << playerId << endl);
-
-    PlayerLeaveNotify notify;
-    notify.playerId = playerId;
-    notify.timestamp = TNOW;
-
-    pushToScenePlayers(sceneId, [&playerId, &notify](tars::TarsCurrentPtr current) {
-        Lobby2ClientPush::async_response_push_onPlayerLeave(current, 0, notify);
-    });
-}
-
 /////////////////////////////////////////////////////////////
-// Scene2LobbyPush 实现 (接收 SceneServer 的回调)
+/// Scene2LobbyPush 实现 (接收 SceneServer 的回调)
 /////////////////////////////////////////////////////////////
 
 tars::Int32 Scene2LobbyPushImp::onPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, tars::TarsCurrentPtr _current_)
