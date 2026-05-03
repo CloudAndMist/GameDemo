@@ -23,6 +23,9 @@ link_directories(/usr/local/tars/cpp/thirdparty/lib)
 
 #include_directories(/home/tarsprotol/App/OtherServer)
 
+# 包含 GameDemoBase 公共协议目录 (Push.tars 在此)
+include_directories(${CMAKE_SOURCE_DIR}/../GameDemoBase)
+
 add_subdirectory(src)
 
 #target_link_libraries(mysqlclient ssl crypto nghttp2-static)

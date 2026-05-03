@@ -1,78 +1,29 @@
 // ========== Scene.tars ==========
 // SceneServer 场景服务接口
+// 架构原则: Client 不直接连接 SceneServer，所有请求通过 LobbyServer 转发
+// 推送机制: SceneServer 直接调用 LobbyServer 回调接口，无需注册
 
 #include "GameDemoBase.tars"
 
 module GameDemo
 {
-    // 进入场景请求
-    struct EnterSceneReq
-    {
-        0 require long playerId;
-        1 require int sceneId;
-    };
-
-    // 进入场景响应
-    struct EnterSceneRsp
-    {
-        0 require int ret;
-        1 optional string msg;
-        2 optional PlayerInfo self;
-        3 optional vector<PlayerInfo> players;
-    };
-
-    // 移动请求
-    struct MoveReq
-    {
-        0 require long playerId;
-        1 require float x;
-        2 require float y;
-        3 require float z;
-    };
-
-    // 移动响应
-    struct MoveRsp
-    {
-        0 require int ret;
-        1 optional string msg;
-    };
-
-    // 心跳请求
-    struct HeartBeatReq
-    {
-        0 require long playerId;
-    };
-
-    // 获取场景玩家响应
-    struct GetScenePlayersRsp
-    {
-        0 require int ret;
-        1 optional string msg;
-        2 optional vector<PlayerInfo> players;
-    };
-
-    // SceneServer → LobbyServer 回调接口
-    interface SceneCallback
-    {
-        int onPlayerEnter(out PlayerInfo player);
-        int onPlayerLeave(out long playerId);
-        int onPlayerMove(out PlayerMoveNotify notify);
-        int onSyncRequest(out int sceneId);
-    };
-
-    // 场景服务接口
+    // SceneServant 接口定义
+    // 注意: 共用的请求/响应结构已移至 GameDemoBase/GameDemoBase.tars
     interface SceneServant
     {
-        // 进入场景
+        // 进入场景 (LobbyServer 调用)
         int enterScene(EnterSceneReq req, out EnterSceneRsp rsp);
 
-        // 移动
+        // 移动 (LobbyServer 调用)
         int move(MoveReq req, out MoveRsp rsp);
 
-        // 心跳
+        // 心跳 (LobbyServer 调用)
         int heartbeat(HeartBeatReq req);
 
-        // 获取场景玩家列表
+        // 获取场景玩家列表 (LobbyServer 调用)
         int getScenePlayers(long playerId, int sceneId, out GetScenePlayersRsp rsp);
+
+        // 离开场景 (LobbyServer 调用)
+        int leaveScene(LeaveSceneReq req, out LeaveSceneRsp rsp);
     };
 };

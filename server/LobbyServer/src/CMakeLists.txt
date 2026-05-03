@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(LobbyServer-LobbyServer)
+project(GameDemo-LobbyServer)
 
 # 添加公共头文件路径
-include_directories(${CMAKE_SOURCE_DIR}/../../GameDemoBase)
+include_directories(${CMAKE_SOURCE_DIR}/../GameDemoBase)
 include_directories(${CMAKE_SOURCE_DIR}/../DBServer/src)
+include_directories(${CMAKE_SOURCE_DIR}/../SceneServer/src)  # Scene.tars 引用
 
-gen_server(LobbyServer LobbyServer)
-
-# target_link_libraries(mysqlclient ssl crypto nghttp2-static)
+# 生成 LobbyServer 服务
+gen_server(GameDemo LobbyServer)

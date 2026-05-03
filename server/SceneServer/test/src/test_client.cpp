@@ -158,6 +158,44 @@ int main(int argc, char** argv)
             }
         }
 
+        // =============================================
+        // Test 6: leaveScene - 玩家离开场景
+        // =============================================
+        cout << "\n[6] Testing leaveScene..." << endl;
+        cout << "    playerId=" << playerId << ", sceneId=" << sceneId << endl;
+
+        LeaveSceneReq leaveReq;
+        leaveReq.playerId = playerId;
+        leaveReq.sceneId = sceneId;
+
+        LeaveSceneRsp leaveRsp;
+        ret = prx->leaveScene(leaveReq, leaveRsp);
+
+        if (ret == 0) {
+            cout << "    [OK] leaveScene success!" << endl;
+            cout << "         ret=" << leaveRsp.ret << endl;
+            cout << "         msg=" << leaveRsp.msg << endl;
+        } else {
+            cout << "    [ERROR] leaveScene failed, ret=" << ret << endl;
+        }
+
+        // 验证玩家已离开
+        cout << "\n[6b] getScenePlayers after leave..." << endl;
+        GetScenePlayersRsp afterLeaveRsp;
+        ret = prx->getScenePlayers(playerId, sceneId, afterLeaveRsp);
+        if (ret == 0) {
+            cout << "    Players in scene " << sceneId << " after leave: " << afterLeaveRsp.players.size() << endl;
+            // 注意：此时 playerId 1001 应该不在列表中了
+            bool found = false;
+            for (size_t i = 0; i < afterLeaveRsp.players.size(); ++i) {
+                if (afterLeaveRsp.players[i].playerId == playerId) {
+                    found = true;
+                    break;
+                }
+            }
+            cout << "    Player " << playerId << " still in scene: " << (found ? "YES [ERROR]" : "NO [OK]") << endl;
+        }
+
         cout << "\n========================================" << endl;
         cout << "  All tests completed!" << endl;
         cout << "========================================" << endl;

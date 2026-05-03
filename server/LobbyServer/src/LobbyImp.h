@@ -3,6 +3,7 @@
 
 #include "servant/Application.h"
 #include "Lobby.h"
+#include "Push.h"
 #include "DB.h"
 
 class LobbyServerApp;
@@ -40,8 +41,54 @@ public:
     // 心跳
     virtual tars::Int32 heartbeat(const GameDemo::HeartBeatReq& req, tars::TarsCurrentPtr _current_);
 
+    // 进入场景 (转发给 SceneServer)
+    virtual tars::Int32 enterScene(tars::Int64 playerId, tars::Int32 sceneId, GameDemo::EnterSceneRsp& rsp, tars::TarsCurrentPtr _current_);
+
+    // 移动 (转发给 SceneServer)
+    virtual tars::Int32 move(const GameDemo::MoveReq& req, GameDemo::MoveRsp& rsp, tars::TarsCurrentPtr _current_);
+
+    // 离开场景 (转发给 SceneServer)
+    virtual tars::Int32 leaveScene(tars::Int64 playerId, tars::Int32 sceneId, GameDemo::LeaveSceneRsp& rsp, tars::TarsCurrentPtr _current_);
+
+    // 注册推送 (客户端主动调用以接收推送)
+    virtual tars::Int32 registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _current_);
+
 private:
+    // 推送管理
+    void addScenePlayer(tars::Int32 sceneId, tars::Int64 playerId);
+    void removeScenePlayer(tars::Int32 sceneId, tars::Int64 playerId);
+    void pushToScenePlayers(tars::Int32 sceneId, const std::function<void(tars::TarsCurrentPtr)>& callback);
+    void broadcastPlayerEnter(tars::Int32 sceneId, tars::Int64 playerId, const GameDemo::PlayerInfo& player);
+    void broadcastPlayerMove(tars::Int32 sceneId, tars::Int64 playerId, tars::Float x, tars::Float y, tars::Float z);
+    void broadcastPlayerLeave(tars::Int32 sceneId, tars::Int64 playerId);
     GameDemo::DBServantPrx _dbPrx;
+    GameDemo::SceneServantPrx _scenePrx;
+
+    // 玩家连接映射: playerId -> CurrentPtr (用于推送)
+    std::map<tars::Int64, tars::TarsCurrentPtr> _playerCurrents;
+    // 场景玩家映射: sceneId -> set<playerId>
+    std::map<tars::Int32, std::set<tars::Int64>> _scenePlayers;
+    std::mutex _pushMutex;
+};
+
+// Scene2LobbyPush 实现 (供 SceneServer 调用)
+class Scene2LobbyPushImp : public GameDemo::Scene2LobbyPush
+{
+public:
+    virtual ~Scene2LobbyPushImp(){};
+
+    virtual void initialize(){};
+
+    virtual void destroy(){};
+
+    // 玩家进入场景通知
+    virtual tars::Int32 onPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const GameDemo::PlayerInfo& player, tars::TarsCurrentPtr _current_);
+
+    // 玩家移动通知
+    virtual tars::Int32 onPlayerMove(tars::Int64 playerId, tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, tars::TarsCurrentPtr _current_);
+
+    // 玩家离开场景通知
+    virtual tars::Int32 onPlayerLeave(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
 };
 
 #endif

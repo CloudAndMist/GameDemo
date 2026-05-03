@@ -21,2481 +21,6 @@ using namespace std;
 
 namespace GameDemo
 {
-    struct EnterSceneReq : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.EnterSceneReq";
-        }
-        static string MD5()
-        {
-            return "7c0dc944c05c2016ec794c2371a4606b";
-        }
-        EnterSceneReq()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            playerId = 0;
-            sceneId = 0;
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(playerId, 0);
-            _os.write(sceneId, 1);
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(playerId, 0, true);
-            _is.read(sceneId, 1, true);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
-            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(playerId,"playerId");
-            _ds.display(sceneId,"sceneId");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(playerId, true);
-            _ds.displaySimple(sceneId, false);
-            return _os;
-        }
-    public:
-        tars::Int64 playerId;
-        tars::Int32 sceneId;
-    };
-    inline bool operator==(const EnterSceneReq&l, const EnterSceneReq&r)
-    {
-        return l.playerId == r.playerId && l.sceneId == r.sceneId;
-    }
-    inline bool operator!=(const EnterSceneReq&l, const EnterSceneReq&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const EnterSceneReq&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,EnterSceneReq&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-    struct EnterSceneRsp : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.EnterSceneRsp";
-        }
-        static string MD5()
-        {
-            return "1c87459b2bb9dae7ee339e7fb6658895";
-        }
-        EnterSceneRsp()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            ret = 0;
-            msg = "";
-            self.resetDefautlt();
-            players.clear();
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(ret, 0);
-            if (msg != "")
-            {
-                _os.write(msg, 1);
-            }
-            _os.write(self, 2);
-            if (players.size() > 0)
-            {
-                _os.write(players, 3);
-            }
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(ret, 0, true);
-            _is.read(msg, 1, false);
-            _is.read(self, 2, false);
-            _is.read(players, 3, false);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["ret"] = tars::JsonOutput::writeJson(ret);
-            p->value["msg"] = tars::JsonOutput::writeJson(msg);
-            p->value["self"] = tars::JsonOutput::writeJson(self);
-            p->value["players"] = tars::JsonOutput::writeJson(players);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
-            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
-            tars::JsonInput::readJson(self,pObj->value["self"], false);
-            tars::JsonInput::readJson(players,pObj->value["players"], false);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(ret,"ret");
-            _ds.display(msg,"msg");
-            _ds.display(self,"self");
-            _ds.display(players,"players");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(ret, true);
-            _ds.displaySimple(msg, true);
-            _ds.displaySimple(self, true);
-            _ds.displaySimple(players, false);
-            return _os;
-        }
-    public:
-        tars::Int32 ret;
-        std::string msg;
-        GameDemo::PlayerInfo self;
-        vector<GameDemo::PlayerInfo> players;
-    };
-    inline bool operator==(const EnterSceneRsp&l, const EnterSceneRsp&r)
-    {
-        return l.ret == r.ret && l.msg == r.msg && l.self == r.self && l.players == r.players;
-    }
-    inline bool operator!=(const EnterSceneRsp&l, const EnterSceneRsp&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const EnterSceneRsp&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,EnterSceneRsp&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-    struct MoveReq : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.MoveReq";
-        }
-        static string MD5()
-        {
-            return "50686460be3b7d11bbc122ceda14e777";
-        }
-        MoveReq()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            playerId = 0;
-            x = 0;
-            y = 0;
-            z = 0;
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(playerId, 0);
-            _os.write(x, 1);
-            _os.write(y, 2);
-            _os.write(z, 3);
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(playerId, 0, true);
-            _is.read(x, 1, true);
-            _is.read(y, 2, true);
-            _is.read(z, 3, true);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-            p->value["x"] = tars::JsonOutput::writeJson(x);
-            p->value["y"] = tars::JsonOutput::writeJson(y);
-            p->value["z"] = tars::JsonOutput::writeJson(z);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
-            tars::JsonInput::readJson(x,pObj->value["x"], true);
-            tars::JsonInput::readJson(y,pObj->value["y"], true);
-            tars::JsonInput::readJson(z,pObj->value["z"], true);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(playerId,"playerId");
-            _ds.display(x,"x");
-            _ds.display(y,"y");
-            _ds.display(z,"z");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(playerId, true);
-            _ds.displaySimple(x, true);
-            _ds.displaySimple(y, true);
-            _ds.displaySimple(z, false);
-            return _os;
-        }
-    public:
-        tars::Int64 playerId;
-        tars::Float x;
-        tars::Float y;
-        tars::Float z;
-    };
-    inline bool operator==(const MoveReq&l, const MoveReq&r)
-    {
-        return l.playerId == r.playerId && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z);
-    }
-    inline bool operator!=(const MoveReq&l, const MoveReq&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const MoveReq&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,MoveReq&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-    struct MoveRsp : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.MoveRsp";
-        }
-        static string MD5()
-        {
-            return "b84e4dd5dd1d7c43dbe702512024405f";
-        }
-        MoveRsp()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            ret = 0;
-            msg = "";
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(ret, 0);
-            if (msg != "")
-            {
-                _os.write(msg, 1);
-            }
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(ret, 0, true);
-            _is.read(msg, 1, false);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["ret"] = tars::JsonOutput::writeJson(ret);
-            p->value["msg"] = tars::JsonOutput::writeJson(msg);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
-            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(ret,"ret");
-            _ds.display(msg,"msg");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(ret, true);
-            _ds.displaySimple(msg, false);
-            return _os;
-        }
-    public:
-        tars::Int32 ret;
-        std::string msg;
-    };
-    inline bool operator==(const MoveRsp&l, const MoveRsp&r)
-    {
-        return l.ret == r.ret && l.msg == r.msg;
-    }
-    inline bool operator!=(const MoveRsp&l, const MoveRsp&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const MoveRsp&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,MoveRsp&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-    struct HeartBeatReq : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.HeartBeatReq";
-        }
-        static string MD5()
-        {
-            return "282dee69d7580ed43b374bb636595df2";
-        }
-        HeartBeatReq()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            playerId = 0;
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(playerId, 0);
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(playerId, 0, true);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(playerId,"playerId");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(playerId, false);
-            return _os;
-        }
-    public:
-        tars::Int64 playerId;
-    };
-    inline bool operator==(const HeartBeatReq&l, const HeartBeatReq&r)
-    {
-        return l.playerId == r.playerId;
-    }
-    inline bool operator!=(const HeartBeatReq&l, const HeartBeatReq&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const HeartBeatReq&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,HeartBeatReq&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-    struct GetScenePlayersRsp : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.GetScenePlayersRsp";
-        }
-        static string MD5()
-        {
-            return "ff9ca8c49b0ca25e502929a831e7065a";
-        }
-        GetScenePlayersRsp()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            ret = 0;
-            msg = "";
-            players.clear();
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(ret, 0);
-            if (msg != "")
-            {
-                _os.write(msg, 1);
-            }
-            if (players.size() > 0)
-            {
-                _os.write(players, 2);
-            }
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(ret, 0, true);
-            _is.read(msg, 1, false);
-            _is.read(players, 2, false);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["ret"] = tars::JsonOutput::writeJson(ret);
-            p->value["msg"] = tars::JsonOutput::writeJson(msg);
-            p->value["players"] = tars::JsonOutput::writeJson(players);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
-            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
-            tars::JsonInput::readJson(players,pObj->value["players"], false);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(ret,"ret");
-            _ds.display(msg,"msg");
-            _ds.display(players,"players");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(ret, true);
-            _ds.displaySimple(msg, true);
-            _ds.displaySimple(players, false);
-            return _os;
-        }
-    public:
-        tars::Int32 ret;
-        std::string msg;
-        vector<GameDemo::PlayerInfo> players;
-    };
-    inline bool operator==(const GetScenePlayersRsp&l, const GetScenePlayersRsp&r)
-    {
-        return l.ret == r.ret && l.msg == r.msg && l.players == r.players;
-    }
-    inline bool operator!=(const GetScenePlayersRsp&l, const GetScenePlayersRsp&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const GetScenePlayersRsp&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,GetScenePlayersRsp&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-
-    /* callback of async proxy for client */
-    class SceneCallbackPrxCallback: public tars::ServantProxyCallback
-    {
-    public:
-        virtual ~SceneCallbackPrxCallback(){}
-        virtual void callback_onPlayerEnter(tars::Int32 ret,  const GameDemo::PlayerInfo& player)
-        { throw std::runtime_error("callback_onPlayerEnter() override incorrect."); }
-        virtual void callback_onPlayerEnter_exception(tars::Int32 ret)
-        { throw std::runtime_error("callback_onPlayerEnter_exception() override incorrect."); }
-
-        virtual void callback_onPlayerLeave(tars::Int32 ret, tars::Int64 playerId)
-        { throw std::runtime_error("callback_onPlayerLeave() override incorrect."); }
-        virtual void callback_onPlayerLeave_exception(tars::Int32 ret)
-        { throw std::runtime_error("callback_onPlayerLeave_exception() override incorrect."); }
-
-        virtual void callback_onPlayerMove(tars::Int32 ret,  const GameDemo::PlayerMoveNotify& notify)
-        { throw std::runtime_error("callback_onPlayerMove() override incorrect."); }
-        virtual void callback_onPlayerMove_exception(tars::Int32 ret)
-        { throw std::runtime_error("callback_onPlayerMove_exception() override incorrect."); }
-
-        virtual void callback_onSyncRequest(tars::Int32 ret, tars::Int32 sceneId)
-        { throw std::runtime_error("callback_onSyncRequest() override incorrect."); }
-        virtual void callback_onSyncRequest_exception(tars::Int32 ret)
-        { throw std::runtime_error("callback_onSyncRequest_exception() override incorrect."); }
-
-    public:
-        virtual const map<std::string, std::string> & getResponseContext() const
-        {
-            CallbackThreadData * pCbtd = CallbackThreadData::getData();
-            assert(pCbtd != NULL);
-
-            if(!pCbtd->getContextValid())
-            {
-                throw TC_Exception("cann't get response context");
-            }
-            return pCbtd->getResponseContext();
-        }
-
-    public:
-        virtual int onDispatch(tars::ReqMessagePtr _msg_)
-        {
-            static ::std::string __SceneCallback_all[]=
-            {
-                "onPlayerEnter",
-                "onPlayerLeave",
-                "onPlayerMove",
-                "onSyncRequest"
-            };
-            auto it = _msg_->response->status.find("TARS_FUNC");
-            pair<string*, string*> r = equal_range(__SceneCallback_all, __SceneCallback_all+4, (it==_msg_->response->status.end())?_msg_->request.sFuncName:it->second);
-            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
-            switch(r.first - __SceneCallback_all)
-            {
-                case 0:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerEnter_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    tars::Int32 _ret;
-                    _is.read(_ret, 0, true);
-
-                    GameDemo::PlayerInfo player;
-                    _is.read(player, 1, true);
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                            _p_->value["player"] = tars::JsonOutput::writeJson(player);
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerEnter", 0, _trace_param_, "");
-                    }
-
-                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
-                    assert(pCbtd != NULL);
-
-                    pCbtd->setResponseContext(_msg_->response->context);
-
-                    callback_onPlayerEnter(_ret, player);
-
-                    pCbtd->delResponseContext();
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 1:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerLeave_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    tars::Int32 _ret;
-                    _is.read(_ret, 0, true);
-
-                    tars::Int64 playerId;
-                    _is.read(playerId, 1, true);
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                            _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerLeave", 0, _trace_param_, "");
-                    }
-
-                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
-                    assert(pCbtd != NULL);
-
-                    pCbtd->setResponseContext(_msg_->response->context);
-
-                    callback_onPlayerLeave(_ret, playerId);
-
-                    pCbtd->delResponseContext();
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 2:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerMove_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    tars::Int32 _ret;
-                    _is.read(_ret, 0, true);
-
-                    GameDemo::PlayerMoveNotify notify;
-                    _is.read(notify, 1, true);
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                            _p_->value["notify"] = tars::JsonOutput::writeJson(notify);
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerMove", 0, _trace_param_, "");
-                    }
-
-                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
-                    assert(pCbtd != NULL);
-
-                    pCbtd->setResponseContext(_msg_->response->context);
-
-                    callback_onPlayerMove(_ret, notify);
-
-                    pCbtd->delResponseContext();
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 3:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onSyncRequest_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    tars::Int32 _ret;
-                    _is.read(_ret, 0, true);
-
-                    tars::Int32 sceneId;
-                    _is.read(sceneId, 1, true);
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                            _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onSyncRequest", 0, _trace_param_, "");
-                    }
-
-                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
-                    assert(pCbtd != NULL);
-
-                    pCbtd->setResponseContext(_msg_->response->context);
-
-                    callback_onSyncRequest(_ret, sceneId);
-
-                    pCbtd->delResponseContext();
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-            }
-            return tars::TARSSERVERNOFUNCERR;
-        }
-
-    };
-    typedef tars::TC_AutoPtr<SceneCallbackPrxCallback> SceneCallbackPrxCallbackPtr;
-
-    //callback of promise async proxy for client
-    class SceneCallbackPrxCallbackPromise: public tars::ServantProxyCallback
-    {
-    public:
-        virtual ~SceneCallbackPrxCallbackPromise(){}
-    public:
-        struct PromiseonPlayerEnter: virtual public TC_HandleBase
-        {
-        public:
-            tars::Int32 _ret;
-            GameDemo::PlayerInfo player;
-            map<std::string, std::string> _mRspContext;
-        };
-        
-        typedef tars::TC_AutoPtr< SceneCallbackPrxCallbackPromise::PromiseonPlayerEnter > PromiseonPlayerEnterPtr;
-
-        SceneCallbackPrxCallbackPromise(const tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerEnterPtr > &promise)
-        : _promise_onPlayerEnter(promise)
-        {}
-        
-        virtual void callback_onPlayerEnter(const SceneCallbackPrxCallbackPromise::PromiseonPlayerEnterPtr &ptr)
-        {
-            _promise_onPlayerEnter.setValue(ptr);
-        }
-        virtual void callback_onPlayerEnter_exception(tars::Int32 ret)
-        {
-            std::string str("");
-            str += "Function:onPlayerEnter_exception|Ret:";
-            str += TC_Common::tostr(ret);
-            _promise_onPlayerEnter.setException(tars::copyException(str, ret));
-        }
-
-    protected:
-        tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerEnterPtr > _promise_onPlayerEnter;
-
-    public:
-        struct PromiseonPlayerLeave: virtual public TC_HandleBase
-        {
-        public:
-            tars::Int32 _ret;
-            tars::Int64 playerId;
-            map<std::string, std::string> _mRspContext;
-        };
-        
-        typedef tars::TC_AutoPtr< SceneCallbackPrxCallbackPromise::PromiseonPlayerLeave > PromiseonPlayerLeavePtr;
-
-        SceneCallbackPrxCallbackPromise(const tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerLeavePtr > &promise)
-        : _promise_onPlayerLeave(promise)
-        {}
-        
-        virtual void callback_onPlayerLeave(const SceneCallbackPrxCallbackPromise::PromiseonPlayerLeavePtr &ptr)
-        {
-            _promise_onPlayerLeave.setValue(ptr);
-        }
-        virtual void callback_onPlayerLeave_exception(tars::Int32 ret)
-        {
-            std::string str("");
-            str += "Function:onPlayerLeave_exception|Ret:";
-            str += TC_Common::tostr(ret);
-            _promise_onPlayerLeave.setException(tars::copyException(str, ret));
-        }
-
-    protected:
-        tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerLeavePtr > _promise_onPlayerLeave;
-
-    public:
-        struct PromiseonPlayerMove: virtual public TC_HandleBase
-        {
-        public:
-            tars::Int32 _ret;
-            GameDemo::PlayerMoveNotify notify;
-            map<std::string, std::string> _mRspContext;
-        };
-        
-        typedef tars::TC_AutoPtr< SceneCallbackPrxCallbackPromise::PromiseonPlayerMove > PromiseonPlayerMovePtr;
-
-        SceneCallbackPrxCallbackPromise(const tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerMovePtr > &promise)
-        : _promise_onPlayerMove(promise)
-        {}
-        
-        virtual void callback_onPlayerMove(const SceneCallbackPrxCallbackPromise::PromiseonPlayerMovePtr &ptr)
-        {
-            _promise_onPlayerMove.setValue(ptr);
-        }
-        virtual void callback_onPlayerMove_exception(tars::Int32 ret)
-        {
-            std::string str("");
-            str += "Function:onPlayerMove_exception|Ret:";
-            str += TC_Common::tostr(ret);
-            _promise_onPlayerMove.setException(tars::copyException(str, ret));
-        }
-
-    protected:
-        tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerMovePtr > _promise_onPlayerMove;
-
-    public:
-        struct PromiseonSyncRequest: virtual public TC_HandleBase
-        {
-        public:
-            tars::Int32 _ret;
-            tars::Int32 sceneId;
-            map<std::string, std::string> _mRspContext;
-        };
-        
-        typedef tars::TC_AutoPtr< SceneCallbackPrxCallbackPromise::PromiseonSyncRequest > PromiseonSyncRequestPtr;
-
-        SceneCallbackPrxCallbackPromise(const tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonSyncRequestPtr > &promise)
-        : _promise_onSyncRequest(promise)
-        {}
-        
-        virtual void callback_onSyncRequest(const SceneCallbackPrxCallbackPromise::PromiseonSyncRequestPtr &ptr)
-        {
-            _promise_onSyncRequest.setValue(ptr);
-        }
-        virtual void callback_onSyncRequest_exception(tars::Int32 ret)
-        {
-            std::string str("");
-            str += "Function:onSyncRequest_exception|Ret:";
-            str += TC_Common::tostr(ret);
-            _promise_onSyncRequest.setException(tars::copyException(str, ret));
-        }
-
-    protected:
-        tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonSyncRequestPtr > _promise_onSyncRequest;
-
-    public:
-        virtual int onDispatch(tars::ReqMessagePtr _msg_)
-        {
-            static ::std::string __SceneCallback_all[]=
-            {
-                "onPlayerEnter",
-                "onPlayerLeave",
-                "onPlayerMove",
-                "onSyncRequest"
-            };
-
-            pair<string*, string*> r = equal_range(__SceneCallback_all, __SceneCallback_all+4, string(_msg_->request.sFuncName));
-            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
-            switch(r.first - __SceneCallback_all)
-            {
-                case 0:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerEnter_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-
-                    SceneCallbackPrxCallbackPromise::PromiseonPlayerEnterPtr ptr = new SceneCallbackPrxCallbackPromise::PromiseonPlayerEnter();
-
-                    try
-                    {
-                        _is.read(ptr->_ret, 0, true);
-
-                        _is.read(ptr->player, 1, true);
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onPlayerEnter_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onPlayerEnter_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    ptr->_mRspContext = _msg_->response->context;
-
-                    callback_onPlayerEnter(ptr);
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 1:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerLeave_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-
-                    SceneCallbackPrxCallbackPromise::PromiseonPlayerLeavePtr ptr = new SceneCallbackPrxCallbackPromise::PromiseonPlayerLeave();
-
-                    try
-                    {
-                        _is.read(ptr->_ret, 0, true);
-
-                        _is.read(ptr->playerId, 1, true);
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onPlayerLeave_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onPlayerLeave_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    ptr->_mRspContext = _msg_->response->context;
-
-                    callback_onPlayerLeave(ptr);
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 2:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerMove_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-
-                    SceneCallbackPrxCallbackPromise::PromiseonPlayerMovePtr ptr = new SceneCallbackPrxCallbackPromise::PromiseonPlayerMove();
-
-                    try
-                    {
-                        _is.read(ptr->_ret, 0, true);
-
-                        _is.read(ptr->notify, 1, true);
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onPlayerMove_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onPlayerMove_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    ptr->_mRspContext = _msg_->response->context;
-
-                    callback_onPlayerMove(ptr);
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 3:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onSyncRequest_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-
-                    SceneCallbackPrxCallbackPromise::PromiseonSyncRequestPtr ptr = new SceneCallbackPrxCallbackPromise::PromiseonSyncRequest();
-
-                    try
-                    {
-                        _is.read(ptr->_ret, 0, true);
-
-                        _is.read(ptr->sceneId, 1, true);
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onSyncRequest_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onSyncRequest_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    ptr->_mRspContext = _msg_->response->context;
-
-                    callback_onSyncRequest(ptr);
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-            }
-            return tars::TARSSERVERNOFUNCERR;
-        }
-
-    };
-    typedef tars::TC_AutoPtr<SceneCallbackPrxCallbackPromise> SceneCallbackPrxCallbackPromisePtr;
-
-    /* callback of coroutine async proxy for client */
-    class SceneCallbackCoroPrxCallback: public SceneCallbackPrxCallback
-    {
-    public:
-        virtual ~SceneCallbackCoroPrxCallback(){}
-    public:
-        virtual const map<std::string, std::string> & getResponseContext() const { return _mRspContext; }
-
-        virtual void setResponseContext(const map<std::string, std::string> &mContext) { _mRspContext = mContext; }
-
-    public:
-        int onDispatch(tars::ReqMessagePtr _msg_)
-        {
-            static ::std::string __SceneCallback_all[]=
-            {
-                "onPlayerEnter",
-                "onPlayerLeave",
-                "onPlayerMove",
-                "onSyncRequest"
-            };
-
-            pair<string*, string*> r = equal_range(__SceneCallback_all, __SceneCallback_all+4, string(_msg_->request.sFuncName));
-            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
-            switch(r.first - __SceneCallback_all)
-            {
-                case 0:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerEnter_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    try
-                    {
-                        tars::Int32 _ret;
-                        _is.read(_ret, 0, true);
-
-                        GameDemo::PlayerInfo player;
-                        _is.read(player, 1, true);
-                        setResponseContext(_msg_->response->context);
-
-                        callback_onPlayerEnter(_ret, player);
-
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onPlayerEnter_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onPlayerEnter_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 1:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerLeave_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    try
-                    {
-                        tars::Int32 _ret;
-                        _is.read(_ret, 0, true);
-
-                        tars::Int64 playerId;
-                        _is.read(playerId, 1, true);
-                        setResponseContext(_msg_->response->context);
-
-                        callback_onPlayerLeave(_ret, playerId);
-
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onPlayerLeave_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onPlayerLeave_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 2:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onPlayerMove_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    try
-                    {
-                        tars::Int32 _ret;
-                        _is.read(_ret, 0, true);
-
-                        GameDemo::PlayerMoveNotify notify;
-                        _is.read(notify, 1, true);
-                        setResponseContext(_msg_->response->context);
-
-                        callback_onPlayerMove(_ret, notify);
-
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onPlayerMove_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onPlayerMove_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 3:
-                {
-                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
-                    {
-                        callback_onSyncRequest_exception(_msg_->response->iRet);
-
-                        return _msg_->response->iRet;
-                    }
-                    tars::TarsInputStream<tars::BufferReader> _is;
-
-                    _is.setBuffer(_msg_->response->sBuffer);
-                    try
-                    {
-                        tars::Int32 _ret;
-                        _is.read(_ret, 0, true);
-
-                        tars::Int32 sceneId;
-                        _is.read(sceneId, 1, true);
-                        setResponseContext(_msg_->response->context);
-
-                        callback_onSyncRequest(_ret, sceneId);
-
-                    }
-                    catch(std::exception &ex)
-                    {
-                        callback_onSyncRequest_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-                    catch(...)
-                    {
-                        callback_onSyncRequest_exception(tars::TARSCLIENTDECODEERR);
-
-                        return tars::TARSCLIENTDECODEERR;
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-            }
-            return tars::TARSSERVERNOFUNCERR;
-        }
-
-    protected:
-        map<std::string, std::string> _mRspContext;
-    };
-    typedef tars::TC_AutoPtr<SceneCallbackCoroPrxCallback> SceneCallbackCoroPrxCallbackPtr;
-
-    /* proxy for client */
-    class SceneCallbackProxy : public tars::ServantProxy
-    {
-    public:
-        typedef map<string, string> TARS_CONTEXT;
-        tars::Int32 onPlayerEnter(GameDemo::PlayerInfo &player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(player, 1);
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerEnter", 0, _trace_param_, "");
-            }
-
-            std::map<string, string> _mStatus;
-            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus);
-            if(pResponseContext)
-            {
-                pResponseContext->swap(rep->context);
-            }
-
-            tars::TarsInputStream<tars::BufferReader> _is;
-            _is.setBuffer(rep->sBuffer);
-            tars::Int32 _ret;
-            _is.read(_ret, 0, true);
-            _is.read(player, 1, true);
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["player"] = tars::JsonOutput::writeJson(player);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerEnter", 0, _trace_param_, "");
-            }
-
-            return _ret;
-        }
-
-        void async_onPlayerEnter(SceneCallbackPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerEnter", 0, _trace_param_, "");
-            }
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback);
-        }
-        
-        tars::Future< SceneCallbackPrxCallbackPromise::PromiseonPlayerEnterPtr > promise_async_onPlayerEnter(const map<string, string>& context)
-        {
-            tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerEnterPtr > promise;
-            SceneCallbackPrxCallbackPromisePtr callback = new SceneCallbackPrxCallbackPromise(promise);
-
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback);
-
-            return promise.getFuture();
-        }
-
-        void coro_onPlayerEnter(SceneCallbackCoroPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback, true);
-        }
-
-        tars::Int32 onPlayerLeave(tars::Int64 &playerId,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerLeave", 0, _trace_param_, "");
-            }
-
-            std::map<string, string> _mStatus;
-            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus);
-            if(pResponseContext)
-            {
-                pResponseContext->swap(rep->context);
-            }
-
-            tars::TarsInputStream<tars::BufferReader> _is;
-            _is.setBuffer(rep->sBuffer);
-            tars::Int32 _ret;
-            _is.read(_ret, 0, true);
-            _is.read(playerId, 1, true);
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerLeave", 0, _trace_param_, "");
-            }
-
-            return _ret;
-        }
-
-        void async_onPlayerLeave(SceneCallbackPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerLeave", 0, _trace_param_, "");
-            }
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus, callback);
-        }
-        
-        tars::Future< SceneCallbackPrxCallbackPromise::PromiseonPlayerLeavePtr > promise_async_onPlayerLeave(const map<string, string>& context)
-        {
-            tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerLeavePtr > promise;
-            SceneCallbackPrxCallbackPromisePtr callback = new SceneCallbackPrxCallbackPromise(promise);
-
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus, callback);
-
-            return promise.getFuture();
-        }
-
-        void coro_onPlayerLeave(SceneCallbackCoroPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus, callback, true);
-        }
-
-        tars::Int32 onPlayerMove(GameDemo::PlayerMoveNotify &notify,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(notify, 1);
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerMove", 0, _trace_param_, "");
-            }
-
-            std::map<string, string> _mStatus;
-            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus);
-            if(pResponseContext)
-            {
-                pResponseContext->swap(rep->context);
-            }
-
-            tars::TarsInputStream<tars::BufferReader> _is;
-            _is.setBuffer(rep->sBuffer);
-            tars::Int32 _ret;
-            _is.read(_ret, 0, true);
-            _is.read(notify, 1, true);
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["notify"] = tars::JsonOutput::writeJson(notify);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerMove", 0, _trace_param_, "");
-            }
-
-            return _ret;
-        }
-
-        void async_onPlayerMove(SceneCallbackPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onPlayerMove", 0, _trace_param_, "");
-            }
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus, callback);
-        }
-        
-        tars::Future< SceneCallbackPrxCallbackPromise::PromiseonPlayerMovePtr > promise_async_onPlayerMove(const map<string, string>& context)
-        {
-            tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonPlayerMovePtr > promise;
-            SceneCallbackPrxCallbackPromisePtr callback = new SceneCallbackPrxCallbackPromise(promise);
-
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus, callback);
-
-            return promise.getFuture();
-        }
-
-        void coro_onPlayerMove(SceneCallbackCoroPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus, callback, true);
-        }
-
-        tars::Int32 onSyncRequest(tars::Int32 &sceneId,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(sceneId, 1);
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onSyncRequest", 0, _trace_param_, "");
-            }
-
-            std::map<string, string> _mStatus;
-            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"onSyncRequest", _os, context, _mStatus);
-            if(pResponseContext)
-            {
-                pResponseContext->swap(rep->context);
-            }
-
-            tars::TarsInputStream<tars::BufferReader> _is;
-            _is.setBuffer(rep->sBuffer);
-            tars::Int32 _ret;
-            _is.read(_ret, 0, true);
-            _is.read(sceneId, 1, true);
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onSyncRequest", 0, _trace_param_, "");
-            }
-
-            return _ret;
-        }
-
-        void async_onSyncRequest(SceneCallbackPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-            if (_pSptd_ && _pSptd_->_traceCall)
-            {
-                _pSptd_->newSpan();
-                string _trace_param_;
-                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "onSyncRequest", 0, _trace_param_, "");
-            }
-            tars_invoke_async(tars::TARSNORMAL,"onSyncRequest", _os, context, _mStatus, callback);
-        }
-        
-        tars::Future< SceneCallbackPrxCallbackPromise::PromiseonSyncRequestPtr > promise_async_onSyncRequest(const map<string, string>& context)
-        {
-            tars::Promise< SceneCallbackPrxCallbackPromise::PromiseonSyncRequestPtr > promise;
-            SceneCallbackPrxCallbackPromisePtr callback = new SceneCallbackPrxCallbackPromise(promise);
-
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onSyncRequest", _os, context, _mStatus, callback);
-
-            return promise.getFuture();
-        }
-
-        void coro_onSyncRequest(SceneCallbackCoroPrxCallbackPtr callback,const map<string, string>& context = TARS_CONTEXT())
-        {
-            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            std::map<string, string> _mStatus;
-            tars_invoke_async(tars::TARSNORMAL,"onSyncRequest", _os, context, _mStatus, callback, true);
-        }
-
-        SceneCallbackProxy* tars_hash(uint32_t key)
-        {
-            return (SceneCallbackProxy*)ServantProxy::tars_hash(key);
-        }
-
-        SceneCallbackProxy* tars_consistent_hash(uint32_t key)
-        {
-            return (SceneCallbackProxy*)ServantProxy::tars_consistent_hash(key);
-        }
-
-        SceneCallbackProxy* tars_open_trace(bool traceParam = false)
-        {
-            return (SceneCallbackProxy*)ServantProxy::tars_open_trace(traceParam);
-        }
-
-        SceneCallbackProxy* tars_set_timeout(int msecond)
-        {
-            return (SceneCallbackProxy*)ServantProxy::tars_set_timeout(msecond);
-        }
-
-        static const char* tars_prxname() { return "SceneCallbackProxy"; }
-    };
-    typedef tars::TC_AutoPtr<SceneCallbackProxy> SceneCallbackPrx;
-
-    /* servant for server */
-    class SceneCallback : public tars::Servant
-    {
-    public:
-        virtual ~SceneCallback(){}
-        virtual tars::Int32 onPlayerEnter(GameDemo::PlayerInfo &player,tars::TarsCurrentPtr _current_) = 0;
-        static void async_response_onPlayerEnter(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const GameDemo::PlayerInfo &player)
-        {
-            size_t _rsp_len_ = 0;
-            if (_current_->getRequestVersion() == TUPVERSION )
-            {
-                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                _tarsAttr_.setVersion(_current_->getRequestVersion());
-                _tarsAttr_.put("", _ret);
-                _tarsAttr_.put("tars_ret", _ret);
-                _tarsAttr_.put("player", player);
-
-                vector<char> sTupResponseBuffer;
-                _tarsAttr_.encode(sTupResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
-                _rsp_len_ = sTupResponseBuffer.size();
-            }
-            else if (_current_->getRequestVersion() == JSONVERSION)
-            {
-                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                _p->value["player"] = tars::JsonOutput::writeJson(player);
-                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                vector<char> sJsonResponseBuffer;
-                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
-                _rsp_len_ = sJsonResponseBuffer.size();
-            }
-            else
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(player, 1);
-
-                _rsp_len_ = _os.getLength();
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
-            }
-            if (_current_->isTraced())
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["player"] = tars::JsonOutput::writeJson(player);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerEnter", 0, _trace_param_, "");
-            }
-
-        }
-        static void async_response_push_onPlayerEnter(tars::CurrentPtr _current_, tars::Int32 _ret, const GameDemo::PlayerInfo &player, const map<string, string> &_context = tars::Current::TARS_STATUS())
-        {
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(player, 1);
-
-                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"onPlayerEnter", _os, _context);
-            }
-        }
-
-        virtual tars::Int32 onPlayerLeave(tars::Int64 &playerId,tars::TarsCurrentPtr _current_) = 0;
-        static void async_response_onPlayerLeave(tars::TarsCurrentPtr _current_, tars::Int32 _ret, tars::Int64 playerId)
-        {
-            size_t _rsp_len_ = 0;
-            if (_current_->getRequestVersion() == TUPVERSION )
-            {
-                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                _tarsAttr_.setVersion(_current_->getRequestVersion());
-                _tarsAttr_.put("", _ret);
-                _tarsAttr_.put("tars_ret", _ret);
-                _tarsAttr_.put("playerId", playerId);
-
-                vector<char> sTupResponseBuffer;
-                _tarsAttr_.encode(sTupResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
-                _rsp_len_ = sTupResponseBuffer.size();
-            }
-            else if (_current_->getRequestVersion() == JSONVERSION)
-            {
-                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                _p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                vector<char> sJsonResponseBuffer;
-                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
-                _rsp_len_ = sJsonResponseBuffer.size();
-            }
-            else
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(playerId, 1);
-
-                _rsp_len_ = _os.getLength();
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
-            }
-            if (_current_->isTraced())
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerLeave", 0, _trace_param_, "");
-            }
-
-        }
-        static void async_response_push_onPlayerLeave(tars::CurrentPtr _current_, tars::Int32 _ret, tars::Int64 playerId, const map<string, string> &_context = tars::Current::TARS_STATUS())
-        {
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(playerId, 1);
-
-                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"onPlayerLeave", _os, _context);
-            }
-        }
-
-        virtual tars::Int32 onPlayerMove(GameDemo::PlayerMoveNotify &notify,tars::TarsCurrentPtr _current_) = 0;
-        static void async_response_onPlayerMove(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const GameDemo::PlayerMoveNotify &notify)
-        {
-            size_t _rsp_len_ = 0;
-            if (_current_->getRequestVersion() == TUPVERSION )
-            {
-                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                _tarsAttr_.setVersion(_current_->getRequestVersion());
-                _tarsAttr_.put("", _ret);
-                _tarsAttr_.put("tars_ret", _ret);
-                _tarsAttr_.put("notify", notify);
-
-                vector<char> sTupResponseBuffer;
-                _tarsAttr_.encode(sTupResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
-                _rsp_len_ = sTupResponseBuffer.size();
-            }
-            else if (_current_->getRequestVersion() == JSONVERSION)
-            {
-                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                _p->value["notify"] = tars::JsonOutput::writeJson(notify);
-                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                vector<char> sJsonResponseBuffer;
-                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
-                _rsp_len_ = sJsonResponseBuffer.size();
-            }
-            else
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(notify, 1);
-
-                _rsp_len_ = _os.getLength();
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
-            }
-            if (_current_->isTraced())
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["notify"] = tars::JsonOutput::writeJson(notify);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerMove", 0, _trace_param_, "");
-            }
-
-        }
-        static void async_response_push_onPlayerMove(tars::CurrentPtr _current_, tars::Int32 _ret, const GameDemo::PlayerMoveNotify &notify, const map<string, string> &_context = tars::Current::TARS_STATUS())
-        {
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(notify, 1);
-
-                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"onPlayerMove", _os, _context);
-            }
-        }
-
-        virtual tars::Int32 onSyncRequest(tars::Int32 &sceneId,tars::TarsCurrentPtr _current_) = 0;
-        static void async_response_onSyncRequest(tars::TarsCurrentPtr _current_, tars::Int32 _ret, tars::Int32 sceneId)
-        {
-            size_t _rsp_len_ = 0;
-            if (_current_->getRequestVersion() == TUPVERSION )
-            {
-                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                _tarsAttr_.setVersion(_current_->getRequestVersion());
-                _tarsAttr_.put("", _ret);
-                _tarsAttr_.put("tars_ret", _ret);
-                _tarsAttr_.put("sceneId", sceneId);
-
-                vector<char> sTupResponseBuffer;
-                _tarsAttr_.encode(sTupResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
-                _rsp_len_ = sTupResponseBuffer.size();
-            }
-            else if (_current_->getRequestVersion() == JSONVERSION)
-            {
-                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                _p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                vector<char> sJsonResponseBuffer;
-                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
-                _rsp_len_ = sJsonResponseBuffer.size();
-            }
-            else
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(sceneId, 1);
-
-                _rsp_len_ = _os.getLength();
-                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
-            }
-            if (_current_->isTraced())
-            {
-                string _trace_param_;
-                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
-                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                {
-                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                    _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-                    _trace_param_ = tars::TC_Json::writeValue(_p_);
-                }
-                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                {
-                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                }
-                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onSyncRequest", 0, _trace_param_, "");
-            }
-
-        }
-        static void async_response_push_onSyncRequest(tars::CurrentPtr _current_, tars::Int32 _ret, tars::Int32 sceneId, const map<string, string> &_context = tars::Current::TARS_STATUS())
-        {
-            {
-                tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                _os.write(_ret, 0);
-
-                _os.write(sceneId, 1);
-
-                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"onSyncRequest", _os, _context);
-            }
-        }
-
-    public:
-        int onDispatch(tars::TarsCurrentPtr _current, vector<char> &_sResponseBuffer)
-        {
-            static ::std::string __GameDemo__SceneCallback_all[]=
-            {
-                "onPlayerEnter",
-                "onPlayerLeave",
-                "onPlayerMove",
-                "onSyncRequest"
-            };
-
-            pair<string*, string*> r = equal_range(__GameDemo__SceneCallback_all, __GameDemo__SceneCallback_all+4, _current->getFuncName());
-            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
-            switch(r.first - __GameDemo__SceneCallback_all)
-            {
-                case 0:
-                {
-                    tars::TarsInputStream<tars::BufferReader> _is;
-                    _is.setBuffer(_current->getRequestBuffer());
-                    GameDemo::PlayerInfo player;
-                    if (_current->getRequestVersion() == TUPVERSION)
-                    {
-                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                        _tarsAttr_.setVersion(_current->getRequestVersion());
-                        _tarsAttr_.decode(_current->getRequestBuffer());
-                        _tarsAttr_.getByDefault("player", player, player);
-                    }
-                    else if (_current->getRequestVersion() == JSONVERSION)
-                    {
-                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
-                        tars::JsonInput::readJson(player, _jsonPtr->value["player"], false);
-                    }
-                    else
-                    {
-                        _is.read(player, 1, false);
-                    }
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerEnter", 0, _trace_param_, "");
-                    }
-
-                    tars::Int32 _ret = onPlayerEnter(player, _current);
-                    if(_current->isResponse())
-                    {
-                        if (_current->getRequestVersion() == TUPVERSION)
-                        {
-                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                            _tarsAttr_.setVersion(_current->getRequestVersion());
-                            _tarsAttr_.put("", _ret);
-                            _tarsAttr_.put("tars_ret", _ret);
-                            _tarsAttr_.put("player", player);
-                            _tarsAttr_.encode(_sResponseBuffer);
-                        }
-                        else if (_current->getRequestVersion() == JSONVERSION)
-                        {
-                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                            _p->value["player"] = tars::JsonOutput::writeJson(player);
-                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
-                        }
-                        else
-                        {
-                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                            _os.write(_ret, 0);
-                            _os.write(player, 1);
-                            _os.swap(_sResponseBuffer);
-                        }
-                        if (_pSptd_ && _pSptd_->_traceCall)
-                        {
-                            string _trace_param_;
-                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
-                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                            {
-                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                                _p_->value["player"] = tars::JsonOutput::writeJson(player);
-                                _trace_param_ = tars::TC_Json::writeValue(_p_);
-                            }
-                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                            {
-                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                            }
-                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerEnter", 0, _trace_param_, "");
-                        }
-
-                    }
-                    else if(_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 1:
-                {
-                    tars::TarsInputStream<tars::BufferReader> _is;
-                    _is.setBuffer(_current->getRequestBuffer());
-                    tars::Int64 playerId;
-                    if (_current->getRequestVersion() == TUPVERSION)
-                    {
-                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                        _tarsAttr_.setVersion(_current->getRequestVersion());
-                        _tarsAttr_.decode(_current->getRequestBuffer());
-                        _tarsAttr_.getByDefault("playerId", playerId, playerId);
-                    }
-                    else if (_current->getRequestVersion() == JSONVERSION)
-                    {
-                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
-                        tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], false);
-                    }
-                    else
-                    {
-                        _is.read(playerId, 1, false);
-                    }
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerLeave", 0, _trace_param_, "");
-                    }
-
-                    tars::Int32 _ret = onPlayerLeave(playerId, _current);
-                    if(_current->isResponse())
-                    {
-                        if (_current->getRequestVersion() == TUPVERSION)
-                        {
-                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                            _tarsAttr_.setVersion(_current->getRequestVersion());
-                            _tarsAttr_.put("", _ret);
-                            _tarsAttr_.put("tars_ret", _ret);
-                            _tarsAttr_.put("playerId", playerId);
-                            _tarsAttr_.encode(_sResponseBuffer);
-                        }
-                        else if (_current->getRequestVersion() == JSONVERSION)
-                        {
-                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                            _p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
-                        }
-                        else
-                        {
-                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                            _os.write(_ret, 0);
-                            _os.write(playerId, 1);
-                            _os.swap(_sResponseBuffer);
-                        }
-                        if (_pSptd_ && _pSptd_->_traceCall)
-                        {
-                            string _trace_param_;
-                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
-                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                            {
-                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                                _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-                                _trace_param_ = tars::TC_Json::writeValue(_p_);
-                            }
-                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                            {
-                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                            }
-                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerLeave", 0, _trace_param_, "");
-                        }
-
-                    }
-                    else if(_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 2:
-                {
-                    tars::TarsInputStream<tars::BufferReader> _is;
-                    _is.setBuffer(_current->getRequestBuffer());
-                    GameDemo::PlayerMoveNotify notify;
-                    if (_current->getRequestVersion() == TUPVERSION)
-                    {
-                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                        _tarsAttr_.setVersion(_current->getRequestVersion());
-                        _tarsAttr_.decode(_current->getRequestBuffer());
-                        _tarsAttr_.getByDefault("notify", notify, notify);
-                    }
-                    else if (_current->getRequestVersion() == JSONVERSION)
-                    {
-                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
-                        tars::JsonInput::readJson(notify, _jsonPtr->value["notify"], false);
-                    }
-                    else
-                    {
-                        _is.read(notify, 1, false);
-                    }
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerMove", 0, _trace_param_, "");
-                    }
-
-                    tars::Int32 _ret = onPlayerMove(notify, _current);
-                    if(_current->isResponse())
-                    {
-                        if (_current->getRequestVersion() == TUPVERSION)
-                        {
-                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                            _tarsAttr_.setVersion(_current->getRequestVersion());
-                            _tarsAttr_.put("", _ret);
-                            _tarsAttr_.put("tars_ret", _ret);
-                            _tarsAttr_.put("notify", notify);
-                            _tarsAttr_.encode(_sResponseBuffer);
-                        }
-                        else if (_current->getRequestVersion() == JSONVERSION)
-                        {
-                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                            _p->value["notify"] = tars::JsonOutput::writeJson(notify);
-                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
-                        }
-                        else
-                        {
-                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                            _os.write(_ret, 0);
-                            _os.write(notify, 1);
-                            _os.swap(_sResponseBuffer);
-                        }
-                        if (_pSptd_ && _pSptd_->_traceCall)
-                        {
-                            string _trace_param_;
-                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
-                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                            {
-                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                                _p_->value["notify"] = tars::JsonOutput::writeJson(notify);
-                                _trace_param_ = tars::TC_Json::writeValue(_p_);
-                            }
-                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                            {
-                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                            }
-                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerMove", 0, _trace_param_, "");
-                        }
-
-                    }
-                    else if(_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-                case 3:
-                {
-                    tars::TarsInputStream<tars::BufferReader> _is;
-                    _is.setBuffer(_current->getRequestBuffer());
-                    tars::Int32 sceneId;
-                    if (_current->getRequestVersion() == TUPVERSION)
-                    {
-                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                        _tarsAttr_.setVersion(_current->getRequestVersion());
-                        _tarsAttr_.decode(_current->getRequestBuffer());
-                        _tarsAttr_.getByDefault("sceneId", sceneId, sceneId);
-                    }
-                    else if (_current->getRequestVersion() == JSONVERSION)
-                    {
-                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
-                        tars::JsonInput::readJson(sceneId, _jsonPtr->value["sceneId"], false);
-                    }
-                    else
-                    {
-                        _is.read(sceneId, 1, false);
-                    }
-                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
-                    if (_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        string _trace_param_;
-                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
-                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                        {
-                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                            _trace_param_ = tars::TC_Json::writeValue(_p_);
-                        }
-                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                        {
-                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                        }
-                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onSyncRequest", 0, _trace_param_, "");
-                    }
-
-                    tars::Int32 _ret = onSyncRequest(sceneId, _current);
-                    if(_current->isResponse())
-                    {
-                        if (_current->getRequestVersion() == TUPVERSION)
-                        {
-                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
-                            _tarsAttr_.setVersion(_current->getRequestVersion());
-                            _tarsAttr_.put("", _ret);
-                            _tarsAttr_.put("tars_ret", _ret);
-                            _tarsAttr_.put("sceneId", sceneId);
-                            _tarsAttr_.encode(_sResponseBuffer);
-                        }
-                        else if (_current->getRequestVersion() == JSONVERSION)
-                        {
-                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
-                            _p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
-                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
-                        }
-                        else
-                        {
-                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
-                            _os.write(_ret, 0);
-                            _os.write(sceneId, 1);
-                            _os.swap(_sResponseBuffer);
-                        }
-                        if (_pSptd_ && _pSptd_->_traceCall)
-                        {
-                            string _trace_param_;
-                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
-                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
-                            {
-                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
-                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
-                                _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-                                _trace_param_ = tars::TC_Json::writeValue(_p_);
-                            }
-                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
-                            {
-                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
-                            }
-                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onSyncRequest", 0, _trace_param_, "");
-                        }
-
-                    }
-                    else if(_pSptd_ && _pSptd_->_traceCall)
-                    {
-                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
-                    }
-
-                    return tars::TARSSERVERSUCCESS;
-
-                }
-            }
-            return tars::TARSSERVERNOFUNCERR;
-        }
-    };
-
 
     /* callback of async proxy for client */
     class SceneServantPrxCallback: public tars::ServantProxyCallback
@@ -2516,6 +41,11 @@ namespace GameDemo
         { throw std::runtime_error("callback_heartbeat() override incorrect."); }
         virtual void callback_heartbeat_exception(tars::Int32 ret)
         { throw std::runtime_error("callback_heartbeat_exception() override incorrect."); }
+
+        virtual void callback_leaveScene(tars::Int32 ret,  const GameDemo::LeaveSceneRsp& rsp)
+        { throw std::runtime_error("callback_leaveScene() override incorrect."); }
+        virtual void callback_leaveScene_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_leaveScene_exception() override incorrect."); }
 
         virtual void callback_move(tars::Int32 ret,  const GameDemo::MoveRsp& rsp)
         { throw std::runtime_error("callback_move() override incorrect."); }
@@ -2543,10 +73,11 @@ namespace GameDemo
                 "enterScene",
                 "getScenePlayers",
                 "heartbeat",
+                "leaveScene",
                 "move"
             };
             auto it = _msg_->response->status.find("TARS_FUNC");
-            pair<string*, string*> r = equal_range(__SceneServant_all, __SceneServant_all+4, (it==_msg_->response->status.end())?_msg_->request.sFuncName:it->second);
+            pair<string*, string*> r = equal_range(__SceneServant_all, __SceneServant_all+5, (it==_msg_->response->status.end())?_msg_->request.sFuncName:it->second);
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __SceneServant_all)
             {
@@ -2689,6 +220,53 @@ namespace GameDemo
 
                 }
                 case 3:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_leaveScene_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    GameDemo::LeaveSceneRsp rsp;
+                    _is.read(rsp, 2, true);
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _p_->value["rsp"] = tars::JsonOutput::writeJson(rsp);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "leaveScene", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_leaveScene(_ret, rsp);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -2837,6 +415,36 @@ namespace GameDemo
         tars::Promise< SceneServantPrxCallbackPromise::PromiseheartbeatPtr > _promise_heartbeat;
 
     public:
+        struct PromiseleaveScene: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            GameDemo::LeaveSceneRsp rsp;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< SceneServantPrxCallbackPromise::PromiseleaveScene > PromiseleaveScenePtr;
+
+        SceneServantPrxCallbackPromise(const tars::Promise< SceneServantPrxCallbackPromise::PromiseleaveScenePtr > &promise)
+        : _promise_leaveScene(promise)
+        {}
+        
+        virtual void callback_leaveScene(const SceneServantPrxCallbackPromise::PromiseleaveScenePtr &ptr)
+        {
+            _promise_leaveScene.setValue(ptr);
+        }
+        virtual void callback_leaveScene_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:leaveScene_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_leaveScene.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< SceneServantPrxCallbackPromise::PromiseleaveScenePtr > _promise_leaveScene;
+
+    public:
         struct Promisemove: virtual public TC_HandleBase
         {
         public:
@@ -2874,10 +482,11 @@ namespace GameDemo
                 "enterScene",
                 "getScenePlayers",
                 "heartbeat",
+                "leaveScene",
                 "move"
             };
 
-            pair<string*, string*> r = equal_range(__SceneServant_all, __SceneServant_all+4, string(_msg_->request.sFuncName));
+            pair<string*, string*> r = equal_range(__SceneServant_all, __SceneServant_all+5, string(_msg_->request.sFuncName));
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __SceneServant_all)
             {
@@ -3004,6 +613,46 @@ namespace GameDemo
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
+                        callback_leaveScene_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    SceneServantPrxCallbackPromise::PromiseleaveScenePtr ptr = new SceneServantPrxCallbackPromise::PromiseleaveScene();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                        _is.read(ptr->rsp, 2, true);
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_leaveScene_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_leaveScene_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_leaveScene(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
                         callback_move_exception(_msg_->response->iRet);
 
                         return _msg_->response->iRet;
@@ -3065,10 +714,11 @@ namespace GameDemo
                 "enterScene",
                 "getScenePlayers",
                 "heartbeat",
+                "leaveScene",
                 "move"
             };
 
-            pair<string*, string*> r = equal_range(__SceneServant_all, __SceneServant_all+4, string(_msg_->request.sFuncName));
+            pair<string*, string*> r = equal_range(__SceneServant_all, __SceneServant_all+5, string(_msg_->request.sFuncName));
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __SceneServant_all)
             {
@@ -3188,6 +838,45 @@ namespace GameDemo
 
                 }
                 case 3:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_leaveScene_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        GameDemo::LeaveSceneRsp rsp;
+                        _is.read(rsp, 2, true);
+                        setResponseContext(_msg_->response->context);
+
+                        callback_leaveScene(_ret, rsp);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_leaveScene_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_leaveScene_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -3555,6 +1244,110 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"heartbeat", _os, context, _mStatus, callback, true);
         }
 
+        tars::Int32 leaveScene(const GameDemo::LeaveSceneReq & req,GameDemo::LeaveSceneRsp &rsp,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(req, 1);
+            _os.write(rsp, 2);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["req"] = tars::JsonOutput::writeJson(req);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "leaveScene", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"leaveScene", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            _is.read(rsp, 2, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _p_->value["rsp"] = tars::JsonOutput::writeJson(rsp);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "leaveScene", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_leaveScene(SceneServantPrxCallbackPtr callback,const GameDemo::LeaveSceneReq &req,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(req, 1);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["req"] = tars::JsonOutput::writeJson(req);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "leaveScene", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"leaveScene", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< SceneServantPrxCallbackPromise::PromiseleaveScenePtr > promise_async_leaveScene(const GameDemo::LeaveSceneReq &req,const map<string, string>& context)
+        {
+            tars::Promise< SceneServantPrxCallbackPromise::PromiseleaveScenePtr > promise;
+            SceneServantPrxCallbackPromisePtr callback = new SceneServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(req, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"leaveScene", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_leaveScene(SceneServantCoroPrxCallbackPtr callback,const GameDemo::LeaveSceneReq &req,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(req, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"leaveScene", _os, context, _mStatus, callback, true);
+        }
+
         tars::Int32 move(const GameDemo::MoveReq & req,GameDemo::MoveRsp &rsp,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
@@ -3885,6 +1678,74 @@ namespace GameDemo
             }
         }
 
+        virtual tars::Int32 leaveScene(const GameDemo::LeaveSceneReq & req,GameDemo::LeaveSceneRsp &rsp,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_leaveScene(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const GameDemo::LeaveSceneRsp &rsp)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+                _tarsAttr_.put("rsp", rsp);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["rsp"] = tars::JsonOutput::writeJson(rsp);
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _os.write(rsp, 2);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _p_->value["rsp"] = tars::JsonOutput::writeJson(rsp);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "leaveScene", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_leaveScene(tars::CurrentPtr _current_, tars::Int32 _ret, const GameDemo::LeaveSceneRsp &rsp, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _os.write(rsp, 2);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"leaveScene", _os, _context);
+            }
+        }
+
         virtual tars::Int32 move(const GameDemo::MoveReq & req,GameDemo::MoveRsp &rsp,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_move(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const GameDemo::MoveRsp &rsp)
         {
@@ -3961,10 +1822,11 @@ namespace GameDemo
                 "enterScene",
                 "getScenePlayers",
                 "heartbeat",
+                "leaveScene",
                 "move"
             };
 
-            pair<string*, string*> r = equal_range(__GameDemo__SceneServant_all, __GameDemo__SceneServant_all+4, _current->getFuncName());
+            pair<string*, string*> r = equal_range(__GameDemo__SceneServant_all, __GameDemo__SceneServant_all+5, _current->getFuncName());
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __GameDemo__SceneServant_all)
             {
@@ -4254,6 +2116,102 @@ namespace GameDemo
 
                 }
                 case 3:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
+                    GameDemo::LeaveSceneReq req;
+                    GameDemo::LeaveSceneRsp rsp;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("req", req);
+                        _tarsAttr_.getByDefault("rsp", rsp, rsp);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(req, _jsonPtr->value["req"], true);
+                        tars::JsonInput::readJson(rsp, _jsonPtr->value["rsp"], false);
+                    }
+                    else
+                    {
+                        _is.read(req, 1, true);
+                        _is.read(rsp, 2, false);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["req"] = tars::JsonOutput::writeJson(req);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "leaveScene", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = leaveScene(req,rsp, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.put("rsp", rsp);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["rsp"] = tars::JsonOutput::writeJson(rsp);
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.write(rsp, 2);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _p_->value["rsp"] = tars::JsonOutput::writeJson(rsp);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "leaveScene", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());

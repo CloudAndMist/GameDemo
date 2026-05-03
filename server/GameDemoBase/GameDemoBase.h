@@ -1172,6 +1172,856 @@ namespace GameDemo
         return is;
     }
 
+    struct HeartBeatReq : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.HeartBeatReq";
+        }
+        static string MD5()
+        {
+            return "282dee69d7580ed43b374bb636595df2";
+        }
+        HeartBeatReq()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            playerId = 0;
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(playerId, 0);
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(playerId, 0, true);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(playerId,"playerId");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(playerId, false);
+            return _os;
+        }
+    public:
+        tars::Int64 playerId;
+    };
+    inline bool operator==(const HeartBeatReq&l, const HeartBeatReq&r)
+    {
+        return l.playerId == r.playerId;
+    }
+    inline bool operator!=(const HeartBeatReq&l, const HeartBeatReq&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const HeartBeatReq&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,HeartBeatReq&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct EnterSceneReq : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.EnterSceneReq";
+        }
+        static string MD5()
+        {
+            return "7c0dc944c05c2016ec794c2371a4606b";
+        }
+        EnterSceneReq()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            playerId = 0;
+            sceneId = 0;
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(playerId, 0);
+            _os.write(sceneId, 1);
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(playerId, 0, true);
+            _is.read(sceneId, 1, true);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(playerId,"playerId");
+            _ds.display(sceneId,"sceneId");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(playerId, true);
+            _ds.displaySimple(sceneId, false);
+            return _os;
+        }
+    public:
+        tars::Int64 playerId;
+        tars::Int32 sceneId;
+    };
+    inline bool operator==(const EnterSceneReq&l, const EnterSceneReq&r)
+    {
+        return l.playerId == r.playerId && l.sceneId == r.sceneId;
+    }
+    inline bool operator!=(const EnterSceneReq&l, const EnterSceneReq&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const EnterSceneReq&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,EnterSceneReq&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct EnterSceneRsp : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.EnterSceneRsp";
+        }
+        static string MD5()
+        {
+            return "1c87459b2bb9dae7ee339e7fb6658895";
+        }
+        EnterSceneRsp()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            ret = 0;
+            msg = "";
+            self.resetDefautlt();
+            players.clear();
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(ret, 0);
+            if (msg != "")
+            {
+                _os.write(msg, 1);
+            }
+            _os.write(self, 2);
+            if (players.size() > 0)
+            {
+                _os.write(players, 3);
+            }
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(ret, 0, true);
+            _is.read(msg, 1, false);
+            _is.read(self, 2, false);
+            _is.read(players, 3, false);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["ret"] = tars::JsonOutput::writeJson(ret);
+            p->value["msg"] = tars::JsonOutput::writeJson(msg);
+            p->value["self"] = tars::JsonOutput::writeJson(self);
+            p->value["players"] = tars::JsonOutput::writeJson(players);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
+            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
+            tars::JsonInput::readJson(self,pObj->value["self"], false);
+            tars::JsonInput::readJson(players,pObj->value["players"], false);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(ret,"ret");
+            _ds.display(msg,"msg");
+            _ds.display(self,"self");
+            _ds.display(players,"players");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(ret, true);
+            _ds.displaySimple(msg, true);
+            _ds.displaySimple(self, true);
+            _ds.displaySimple(players, false);
+            return _os;
+        }
+    public:
+        tars::Int32 ret;
+        std::string msg;
+        GameDemo::PlayerInfo self;
+        vector<GameDemo::PlayerInfo> players;
+    };
+    inline bool operator==(const EnterSceneRsp&l, const EnterSceneRsp&r)
+    {
+        return l.ret == r.ret && l.msg == r.msg && l.self == r.self && l.players == r.players;
+    }
+    inline bool operator!=(const EnterSceneRsp&l, const EnterSceneRsp&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const EnterSceneRsp&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,EnterSceneRsp&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct MoveReq : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.MoveReq";
+        }
+        static string MD5()
+        {
+            return "50686460be3b7d11bbc122ceda14e777";
+        }
+        MoveReq()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            playerId = 0;
+            x = 0;
+            y = 0;
+            z = 0;
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(playerId, 0);
+            _os.write(x, 1);
+            _os.write(y, 2);
+            _os.write(z, 3);
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(playerId, 0, true);
+            _is.read(x, 1, true);
+            _is.read(y, 2, true);
+            _is.read(z, 3, true);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["x"] = tars::JsonOutput::writeJson(x);
+            p->value["y"] = tars::JsonOutput::writeJson(y);
+            p->value["z"] = tars::JsonOutput::writeJson(z);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(x,pObj->value["x"], true);
+            tars::JsonInput::readJson(y,pObj->value["y"], true);
+            tars::JsonInput::readJson(z,pObj->value["z"], true);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(playerId,"playerId");
+            _ds.display(x,"x");
+            _ds.display(y,"y");
+            _ds.display(z,"z");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(playerId, true);
+            _ds.displaySimple(x, true);
+            _ds.displaySimple(y, true);
+            _ds.displaySimple(z, false);
+            return _os;
+        }
+    public:
+        tars::Int64 playerId;
+        tars::Float x;
+        tars::Float y;
+        tars::Float z;
+    };
+    inline bool operator==(const MoveReq&l, const MoveReq&r)
+    {
+        return l.playerId == r.playerId && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z);
+    }
+    inline bool operator!=(const MoveReq&l, const MoveReq&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const MoveReq&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,MoveReq&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct MoveRsp : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.MoveRsp";
+        }
+        static string MD5()
+        {
+            return "b84e4dd5dd1d7c43dbe702512024405f";
+        }
+        MoveRsp()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            ret = 0;
+            msg = "";
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(ret, 0);
+            if (msg != "")
+            {
+                _os.write(msg, 1);
+            }
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(ret, 0, true);
+            _is.read(msg, 1, false);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["ret"] = tars::JsonOutput::writeJson(ret);
+            p->value["msg"] = tars::JsonOutput::writeJson(msg);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
+            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(ret,"ret");
+            _ds.display(msg,"msg");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(ret, true);
+            _ds.displaySimple(msg, false);
+            return _os;
+        }
+    public:
+        tars::Int32 ret;
+        std::string msg;
+    };
+    inline bool operator==(const MoveRsp&l, const MoveRsp&r)
+    {
+        return l.ret == r.ret && l.msg == r.msg;
+    }
+    inline bool operator!=(const MoveRsp&l, const MoveRsp&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const MoveRsp&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,MoveRsp&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct LeaveSceneReq : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.LeaveSceneReq";
+        }
+        static string MD5()
+        {
+            return "7c0dc944c05c2016ec794c2371a4606b";
+        }
+        LeaveSceneReq()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            playerId = 0;
+            sceneId = 0;
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(playerId, 0);
+            _os.write(sceneId, 1);
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(playerId, 0, true);
+            _is.read(sceneId, 1, true);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(playerId,"playerId");
+            _ds.display(sceneId,"sceneId");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(playerId, true);
+            _ds.displaySimple(sceneId, false);
+            return _os;
+        }
+    public:
+        tars::Int64 playerId;
+        tars::Int32 sceneId;
+    };
+    inline bool operator==(const LeaveSceneReq&l, const LeaveSceneReq&r)
+    {
+        return l.playerId == r.playerId && l.sceneId == r.sceneId;
+    }
+    inline bool operator!=(const LeaveSceneReq&l, const LeaveSceneReq&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const LeaveSceneReq&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,LeaveSceneReq&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct LeaveSceneRsp : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.LeaveSceneRsp";
+        }
+        static string MD5()
+        {
+            return "b84e4dd5dd1d7c43dbe702512024405f";
+        }
+        LeaveSceneRsp()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            ret = 0;
+            msg = "";
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(ret, 0);
+            if (msg != "")
+            {
+                _os.write(msg, 1);
+            }
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(ret, 0, true);
+            _is.read(msg, 1, false);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["ret"] = tars::JsonOutput::writeJson(ret);
+            p->value["msg"] = tars::JsonOutput::writeJson(msg);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
+            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(ret,"ret");
+            _ds.display(msg,"msg");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(ret, true);
+            _ds.displaySimple(msg, false);
+            return _os;
+        }
+    public:
+        tars::Int32 ret;
+        std::string msg;
+    };
+    inline bool operator==(const LeaveSceneRsp&l, const LeaveSceneRsp&r)
+    {
+        return l.ret == r.ret && l.msg == r.msg;
+    }
+    inline bool operator!=(const LeaveSceneRsp&l, const LeaveSceneRsp&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const LeaveSceneRsp&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,LeaveSceneRsp&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct GetScenePlayersRsp : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.GetScenePlayersRsp";
+        }
+        static string MD5()
+        {
+            return "ff9ca8c49b0ca25e502929a831e7065a";
+        }
+        GetScenePlayersRsp()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            ret = 0;
+            msg = "";
+            players.clear();
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(ret, 0);
+            if (msg != "")
+            {
+                _os.write(msg, 1);
+            }
+            if (players.size() > 0)
+            {
+                _os.write(players, 2);
+            }
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(ret, 0, true);
+            _is.read(msg, 1, false);
+            _is.read(players, 2, false);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["ret"] = tars::JsonOutput::writeJson(ret);
+            p->value["msg"] = tars::JsonOutput::writeJson(msg);
+            p->value["players"] = tars::JsonOutput::writeJson(players);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(ret,pObj->value["ret"], true);
+            tars::JsonInput::readJson(msg,pObj->value["msg"], false);
+            tars::JsonInput::readJson(players,pObj->value["players"], false);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(ret,"ret");
+            _ds.display(msg,"msg");
+            _ds.display(players,"players");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(ret, true);
+            _ds.displaySimple(msg, true);
+            _ds.displaySimple(players, false);
+            return _os;
+        }
+    public:
+        tars::Int32 ret;
+        std::string msg;
+        vector<GameDemo::PlayerInfo> players;
+    };
+    inline bool operator==(const GetScenePlayersRsp&l, const GetScenePlayersRsp&r)
+    {
+        return l.ret == r.ret && l.msg == r.msg && l.players == r.players;
+    }
+    inline bool operator!=(const GetScenePlayersRsp&l, const GetScenePlayersRsp&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const GetScenePlayersRsp&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,GetScenePlayersRsp&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
 
 }
 

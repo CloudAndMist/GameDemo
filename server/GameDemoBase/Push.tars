@@ -1,0 +1,57 @@
+// ========== Push.tars ==========
+// 推送接口定义
+//
+// 架构说明:
+// - Scene2LobbyPush: SceneServer → LobbyServer 的推送接口
+// - Lobby2ClientPush: LobbyServer → 客户端 的推送接口（通过 PushCallback 机制）
+//
+// 使用方式:
+// - SceneServer: 通过 stringToProxy<Scene2LobbyPushPrx>("LobbyServer.Scene2LobbyPushObj") 调用
+// - Client: 调用 tars_set_push_callback() 注册 Lobby2ClientPush 回调
+// - LobbyServer: 收到 Scene2LobbyPush 回调后，通过 CurrentPtr 推送消息给客户端
+
+#include "GameDemoBase.tars"
+
+module GameDemo
+{
+    // ========== Scene2LobbyPush 接口 (SceneServer → LobbyServer) ==========
+    // SceneServer 主动通知 LobbyServer 的接口
+    // LobbyServer 实现此接口，SceneServer 通过 RPC 调用
+
+    interface Scene2LobbyPush
+    {
+        // 玩家进入场景通知
+        // SceneServer 调用此接口通知 LobbyServer 有新玩家进入
+        // LobbyServer 收到后通过 PushCallback 转发给场景内其他玩家的客户端
+        int onPlayerEnter(long playerId, int sceneId, PlayerInfo player);
+
+        // 玩家移动通知
+        // SceneServer 调用此接口通知 LobbyServer 有玩家移动
+        // LobbyServer 收到后通过 PushCallback 转发给场景内其他玩家的客户端
+        int onPlayerMove(long playerId, int sceneId, float x, float y, float z);
+
+        // 玩家离开场景通知
+        // SceneServer 调用此接口通知 LobbyServer 有玩家离开
+        // LobbyServer 收到后通过 PushCallback 转发给场景内其他玩家的客户端
+        int onPlayerLeave(long playerId, int sceneId);
+    };
+
+    // ========== Lobby2ClientPush 接口 (客户端实现，通过 PushCallback 机制被调用) ==========
+    // 客户端实现此接口来接收服务端推送的消息
+    // 使用 TARS PushCallback 机制:
+    //   1. 客户端调用 proxy->tars_set_push_callback(callback)
+    //   2. LobbyServer 通过 CurrentPtr 推送消息
+    // 注意: 使用 out 参数以便服务端推送数据 (参考 PushCallbackDemo)
+
+    interface Lobby2ClientPush
+    {
+        // 推送玩家进入
+        int onPlayerEnter(out PlayerEnterNotify notify);
+
+        // 推送玩家移动
+        int onPlayerMove(out PlayerMoveNotify notify);
+
+        // 推送玩家离开
+        int onPlayerLeave(out PlayerLeaveNotify notify);
+    };
+};

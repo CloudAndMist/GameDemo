@@ -105,4 +105,61 @@ module GameDemo
         3 require int damage;
         4 require int effectType;    // 0:伤害 1:治疗 2:Buff 3:Debuff
     };
+
+    // ========== 心跳 ==========
+    struct HeartBeatReq
+    {
+        0 require long playerId;
+    };
+
+    // ========== 进入场景 ==========
+    struct EnterSceneReq
+    {
+        0 require long playerId;
+        1 require int sceneId;
+    };
+
+    struct EnterSceneRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional PlayerInfo self;
+        3 optional vector<PlayerInfo> players;
+    };
+
+    // ========== 移动 ==========
+    struct MoveReq
+    {
+        0 require long playerId;
+        1 require float x;
+        2 require float y;
+        3 require float z;
+    };
+
+    struct MoveRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+    };
+
+    // ========== 离开场景 ==========
+    struct LeaveSceneReq
+    {
+        0 require long playerId;
+        1 require int sceneId;
+    };
+
+    struct LeaveSceneRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+    };
+
+    // ========== 获取场景玩家 ==========
+    struct GetScenePlayersRsp
+    {
+        0 require int ret;
+        1 optional string msg;
+        2 optional vector<PlayerInfo> players;
+    };
 };

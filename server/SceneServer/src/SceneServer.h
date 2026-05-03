@@ -27,23 +27,22 @@ public:
 
     // 全局玩家数据访问接口
     std::map<tars::Int64, GlobalPlayerData>& getGlobalPlayers();
-    
+
     void addPlayer(tars::Int64 playerId, const GlobalPlayerData& data);
     void removePlayer(tars::Int64 playerId);
     GlobalPlayerData* getPlayer(tars::Int64 playerId);
     void updatePlayerPosition(tars::Int64 playerId, float x, float y, float z);
     void updateHeartbeat(tars::Int64 playerId);
 
-private:
-    std::map<tars::Int64, GlobalPlayerData> _globalPlayers;
-    std::mutex _globalMutex;
-    
 public:
     virtual void initialize();
     virtual void destroyApp();
+
+private:
+    std::map<tars::Int64, GlobalPlayerData> _globalPlayers;
+    std::mutex _globalMutex;
 };
 
 extern SceneServer g_app;
 
-///////////////////////////////////////////
 #endif
