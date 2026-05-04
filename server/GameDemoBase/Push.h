@@ -587,12 +587,13 @@ namespace GameDemo
     {
     public:
         typedef map<string, string> TARS_CONTEXT;
-        tars::Int32 onPlayerEnter(tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        tars::Int32 onPlayerEnter(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(player, 3);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(player, 4);
             ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
             if (_pSptd_ && _pSptd_->_traceCall)
             {
@@ -602,6 +603,7 @@ namespace GameDemo
                 if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                 {
                     tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                     _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                     _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                     _p_->value["player"] = tars::JsonOutput::writeJson(player);
@@ -645,12 +647,13 @@ namespace GameDemo
             return _ret;
         }
 
-        void async_onPlayerEnter(Scene2LobbyPushPrxCallbackPtr callback,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
+        void async_onPlayerEnter(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(player, 3);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(player, 4);
             std::map<string, string> _mStatus;
             ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
             if (_pSptd_ && _pSptd_->_traceCall)
@@ -661,6 +664,7 @@ namespace GameDemo
                 if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                 {
                     tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                     _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                     _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                     _p_->value["player"] = tars::JsonOutput::writeJson(player);
@@ -675,36 +679,39 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback);
         }
         
-        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerEnterPtr > promise_async_onPlayerEnter(tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context)
+        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerEnterPtr > promise_async_onPlayerEnter(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context)
         {
             tars::Promise< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerEnterPtr > promise;
             Scene2LobbyPushPrxCallbackPromisePtr callback = new Scene2LobbyPushPrxCallbackPromise(promise);
 
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(player, 3);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(player, 4);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback);
 
             return promise.getFuture();
         }
 
-        void coro_onPlayerEnter(Scene2LobbyPushCoroPrxCallbackPtr callback,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
+        void coro_onPlayerEnter(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(player, 3);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(player, 4);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback, true);
         }
 
-        tars::Int32 onPlayerLeave(tars::Int64 playerId,tars::Int32 sceneId,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        tars::Int32 onPlayerLeave(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
             ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
             if (_pSptd_ && _pSptd_->_traceCall)
             {
@@ -714,6 +721,7 @@ namespace GameDemo
                 if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                 {
                     tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                     _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                     _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                     _trace_param_ = tars::TC_Json::writeValue(_p_);
@@ -756,11 +764,12 @@ namespace GameDemo
             return _ret;
         }
 
-        void async_onPlayerLeave(Scene2LobbyPushPrxCallbackPtr callback,tars::Int64 playerId,tars::Int32 sceneId,const map<string, string>& context = TARS_CONTEXT())
+        void async_onPlayerLeave(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
             std::map<string, string> _mStatus;
             ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
             if (_pSptd_ && _pSptd_->_traceCall)
@@ -771,6 +780,7 @@ namespace GameDemo
                 if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                 {
                     tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                     _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                     _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                     _trace_param_ = tars::TC_Json::writeValue(_p_);
@@ -784,37 +794,40 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus, callback);
         }
         
-        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerLeavePtr > promise_async_onPlayerLeave(tars::Int64 playerId,tars::Int32 sceneId,const map<string, string>& context)
+        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerLeavePtr > promise_async_onPlayerLeave(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const map<string, string>& context)
         {
             tars::Promise< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerLeavePtr > promise;
             Scene2LobbyPushPrxCallbackPromisePtr callback = new Scene2LobbyPushPrxCallbackPromise(promise);
 
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus, callback);
 
             return promise.getFuture();
         }
 
-        void coro_onPlayerLeave(Scene2LobbyPushCoroPrxCallbackPtr callback,tars::Int64 playerId,tars::Int32 sceneId,const map<string, string>& context = TARS_CONTEXT())
+        void coro_onPlayerLeave(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"onPlayerLeave", _os, context, _mStatus, callback, true);
         }
 
-        tars::Int32 onPlayerMove(tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        tars::Int32 onPlayerMove(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(x, 3);
-            _os.write(y, 4);
-            _os.write(z, 5);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(x, 4);
+            _os.write(y, 5);
+            _os.write(z, 6);
             ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
             if (_pSptd_ && _pSptd_->_traceCall)
             {
@@ -824,6 +837,7 @@ namespace GameDemo
                 if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                 {
                     tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                     _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                     _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                     _p_->value["x"] = tars::JsonOutput::writeJson(x);
@@ -869,14 +883,15 @@ namespace GameDemo
             return _ret;
         }
 
-        void async_onPlayerMove(Scene2LobbyPushPrxCallbackPtr callback,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string>& context = TARS_CONTEXT())
+        void async_onPlayerMove(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(x, 3);
-            _os.write(y, 4);
-            _os.write(z, 5);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(x, 4);
+            _os.write(y, 5);
+            _os.write(z, 6);
             std::map<string, string> _mStatus;
             ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
             if (_pSptd_ && _pSptd_->_traceCall)
@@ -887,6 +902,7 @@ namespace GameDemo
                 if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                 {
                     tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                     _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                     _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                     _p_->value["x"] = tars::JsonOutput::writeJson(x);
@@ -903,31 +919,33 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus, callback);
         }
         
-        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerMovePtr > promise_async_onPlayerMove(tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string>& context)
+        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerMovePtr > promise_async_onPlayerMove(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string>& context)
         {
             tars::Promise< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerMovePtr > promise;
             Scene2LobbyPushPrxCallbackPromisePtr callback = new Scene2LobbyPushPrxCallbackPromise(promise);
 
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(x, 3);
-            _os.write(y, 4);
-            _os.write(z, 5);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(x, 4);
+            _os.write(y, 5);
+            _os.write(z, 6);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus, callback);
 
             return promise.getFuture();
         }
 
-        void coro_onPlayerMove(Scene2LobbyPushCoroPrxCallbackPtr callback,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string>& context = TARS_CONTEXT())
+        void coro_onPlayerMove(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
-            _os.write(playerId, 1);
-            _os.write(sceneId, 2);
-            _os.write(x, 3);
-            _os.write(y, 4);
-            _os.write(z, 5);
+            _os.write(notifyList, 1);
+            _os.write(playerId, 2);
+            _os.write(sceneId, 3);
+            _os.write(x, 4);
+            _os.write(y, 5);
+            _os.write(z, 6);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"onPlayerMove", _os, context, _mStatus, callback, true);
         }
@@ -961,7 +979,7 @@ namespace GameDemo
     {
     public:
         virtual ~Scene2LobbyPush(){}
-        virtual tars::Int32 onPlayerEnter(tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,tars::TarsCurrentPtr _current_) = 0;
+        virtual tars::Int32 onPlayerEnter(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_onPlayerEnter(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
         {
             size_t _rsp_len_ = 0;
@@ -1022,7 +1040,7 @@ namespace GameDemo
             }
         }
 
-        virtual tars::Int32 onPlayerLeave(tars::Int64 playerId,tars::Int32 sceneId,tars::TarsCurrentPtr _current_) = 0;
+        virtual tars::Int32 onPlayerLeave(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_onPlayerLeave(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
         {
             size_t _rsp_len_ = 0;
@@ -1083,7 +1101,7 @@ namespace GameDemo
             }
         }
 
-        virtual tars::Int32 onPlayerMove(tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,tars::TarsCurrentPtr _current_) = 0;
+        virtual tars::Int32 onPlayerMove(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,tars::Float x,tars::Float y,tars::Float z,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_onPlayerMove(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
         {
             size_t _rsp_len_ = 0;
@@ -1162,6 +1180,7 @@ namespace GameDemo
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());
+                    vector<tars::Int64> notifyList;
                     tars::Int64 playerId;
                     tars::Int32 sceneId;
                     GameDemo::PlayerInfo player;
@@ -1170,6 +1189,7 @@ namespace GameDemo
                         UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
                         _tarsAttr_.setVersion(_current->getRequestVersion());
                         _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("notifyList", notifyList);
                         _tarsAttr_.get("playerId", playerId);
                         _tarsAttr_.get("sceneId", sceneId);
                         _tarsAttr_.get("player", player);
@@ -1177,15 +1197,17 @@ namespace GameDemo
                     else if (_current->getRequestVersion() == JSONVERSION)
                     {
                         tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(notifyList, _jsonPtr->value["notifyList"], true);
                         tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], true);
                         tars::JsonInput::readJson(sceneId, _jsonPtr->value["sceneId"], true);
                         tars::JsonInput::readJson(player, _jsonPtr->value["player"], true);
                     }
                     else
                     {
-                        _is.read(playerId, 1, true);
-                        _is.read(sceneId, 2, true);
-                        _is.read(player, 3, true);
+                        _is.read(notifyList, 1, true);
+                        _is.read(playerId, 2, true);
+                        _is.read(sceneId, 3, true);
+                        _is.read(player, 4, true);
                     }
                     ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
                     if (_pSptd_ && _pSptd_->_traceCall)
@@ -1195,6 +1217,7 @@ namespace GameDemo
                         if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                         {
                             tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                             _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                             _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                             _p_->value["player"] = tars::JsonOutput::writeJson(player);
@@ -1207,7 +1230,7 @@ namespace GameDemo
                         TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerEnter", 0, _trace_param_, "");
                     }
 
-                    tars::Int32 _ret = onPlayerEnter(playerId,sceneId,player, _current);
+                    tars::Int32 _ret = onPlayerEnter(notifyList,playerId,sceneId,player, _current);
                     if(_current->isResponse())
                     {
                         if (_current->getRequestVersion() == TUPVERSION)
@@ -1260,6 +1283,7 @@ namespace GameDemo
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());
+                    vector<tars::Int64> notifyList;
                     tars::Int64 playerId;
                     tars::Int32 sceneId;
                     if (_current->getRequestVersion() == TUPVERSION)
@@ -1267,19 +1291,22 @@ namespace GameDemo
                         UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
                         _tarsAttr_.setVersion(_current->getRequestVersion());
                         _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("notifyList", notifyList);
                         _tarsAttr_.get("playerId", playerId);
                         _tarsAttr_.get("sceneId", sceneId);
                     }
                     else if (_current->getRequestVersion() == JSONVERSION)
                     {
                         tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(notifyList, _jsonPtr->value["notifyList"], true);
                         tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], true);
                         tars::JsonInput::readJson(sceneId, _jsonPtr->value["sceneId"], true);
                     }
                     else
                     {
-                        _is.read(playerId, 1, true);
-                        _is.read(sceneId, 2, true);
+                        _is.read(notifyList, 1, true);
+                        _is.read(playerId, 2, true);
+                        _is.read(sceneId, 3, true);
                     }
                     ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
                     if (_pSptd_ && _pSptd_->_traceCall)
@@ -1289,6 +1316,7 @@ namespace GameDemo
                         if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                         {
                             tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                             _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                             _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                             _trace_param_ = tars::TC_Json::writeValue(_p_);
@@ -1300,7 +1328,7 @@ namespace GameDemo
                         TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerLeave", 0, _trace_param_, "");
                     }
 
-                    tars::Int32 _ret = onPlayerLeave(playerId,sceneId, _current);
+                    tars::Int32 _ret = onPlayerLeave(notifyList,playerId,sceneId, _current);
                     if(_current->isResponse())
                     {
                         if (_current->getRequestVersion() == TUPVERSION)
@@ -1353,6 +1381,7 @@ namespace GameDemo
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());
+                    vector<tars::Int64> notifyList;
                     tars::Int64 playerId;
                     tars::Int32 sceneId;
                     tars::Float x;
@@ -1363,6 +1392,7 @@ namespace GameDemo
                         UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
                         _tarsAttr_.setVersion(_current->getRequestVersion());
                         _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("notifyList", notifyList);
                         _tarsAttr_.get("playerId", playerId);
                         _tarsAttr_.get("sceneId", sceneId);
                         _tarsAttr_.get("x", x);
@@ -1372,6 +1402,7 @@ namespace GameDemo
                     else if (_current->getRequestVersion() == JSONVERSION)
                     {
                         tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(notifyList, _jsonPtr->value["notifyList"], true);
                         tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], true);
                         tars::JsonInput::readJson(sceneId, _jsonPtr->value["sceneId"], true);
                         tars::JsonInput::readJson(x, _jsonPtr->value["x"], true);
@@ -1380,11 +1411,12 @@ namespace GameDemo
                     }
                     else
                     {
-                        _is.read(playerId, 1, true);
-                        _is.read(sceneId, 2, true);
-                        _is.read(x, 3, true);
-                        _is.read(y, 4, true);
-                        _is.read(z, 5, true);
+                        _is.read(notifyList, 1, true);
+                        _is.read(playerId, 2, true);
+                        _is.read(sceneId, 3, true);
+                        _is.read(x, 4, true);
+                        _is.read(y, 5, true);
+                        _is.read(z, 6, true);
                     }
                     ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
                     if (_pSptd_ && _pSptd_->_traceCall)
@@ -1394,6 +1426,7 @@ namespace GameDemo
                         if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
                         {
                             tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["notifyList"] = tars::JsonOutput::writeJson(notifyList);
                             _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
                             _p_->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
                             _p_->value["x"] = tars::JsonOutput::writeJson(x);
@@ -1408,7 +1441,7 @@ namespace GameDemo
                         TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "onPlayerMove", 0, _trace_param_, "");
                     }
 
-                    tars::Int32 _ret = onPlayerMove(playerId,sceneId,x,y,z, _current);
+                    tars::Int32 _ret = onPlayerMove(notifyList,playerId,sceneId,x,y,z, _current);
                     if(_current->isResponse())
                     {
                         if (_current->getRequestVersion() == TUPVERSION)

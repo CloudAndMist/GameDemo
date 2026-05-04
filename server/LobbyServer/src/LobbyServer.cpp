@@ -11,6 +11,9 @@ void LobbyServerApp::initialize()
 {
     TLOG_DEBUG("LobbyServerApp::initialize" << endl);
     
+    // 初始化读写锁 (V0.2.5)
+    pthread_rwlock_init(&_playerCurrentsRwlock, NULL);
+    
     // 注册 LobbyServant 接口 (客户端调用)
     addServant<LobbyImp>(ServerConfig::Application + "." + ServerConfig::ServerName + ".LobbyObj");
     
@@ -21,74 +24,69 @@ void LobbyServerApp::initialize()
 void LobbyServerApp::destroyApp()
 {
     TLOG_DEBUG("LobbyServerApp::destroyApp" << endl);
+    // 销毁读写锁 (V0.2.5)
+    pthread_rwlock_destroy(&_playerCurrentsRwlock);
     // 清理推送相关数据
     _connToPlayer.clear();
     _playerToConn.clear();
     _playerCurrents.clear();
-    _scenePlayers.clear();
 }
 
-// ========== 推送管理实现 ==========
+// ========== 推送管理实现 (V0.2.5 pthread 读写锁优化) ==========
 
 void LobbyServerApp::registerClientPush(tars::Int64 playerId, tars::TarsCurrentPtr current)
 {
-    lock_guard<mutex> lock(_pushMutex);
+    // 写操作：独占锁
+    pthread_rwlock_wrlock(&_playerCurrentsRwlock);
     _playerCurrents[playerId] = current;
     TLOG_INFO("registerClientPush playerId=" << playerId << ", total=" << _playerCurrents.size() << endl);
+    pthread_rwlock_unlock(&_playerCurrentsRwlock);
 }
 
-void LobbyServerApp::addScenePlayer(tars::Int32 sceneId, tars::Int64 playerId)
+tars::TarsCurrentPtr LobbyServerApp::getPlayerCurrent(tars::Int64 playerId)
 {
-    lock_guard<mutex> lock(_pushMutex);
-    _scenePlayers[sceneId].insert(playerId);
-    TLOG_INFO("addScenePlayer sceneId=" << sceneId << ", playerId=" << playerId << endl);
+    // 读操作：共享锁
+    pthread_rwlock_rdlock(&_playerCurrentsRwlock);
+    auto it = _playerCurrents.find(playerId);
+    tars::TarsCurrentPtr result = (it != _playerCurrents.end()) ? it->second : nullptr;
+    pthread_rwlock_unlock(&_playerCurrentsRwlock);
+    return result;
 }
 
-void LobbyServerApp::removeScenePlayer(tars::Int32 sceneId, tars::Int64 playerId)
+// V0.2.5: 根据 notifyList 推送 - pthread 读写锁优化
+// SceneServer 传入需要通知的玩家列表，LobbyServer 只负责根据列表推送
+// 读操作使用共享锁，多个推送可并行执行
+void LobbyServerApp::pushToNotifyList(const vector<tars::Int64>& notifyList, const PushCallback& callback)
 {
-    lock_guard<mutex> lock(_pushMutex);
-    auto it = _scenePlayers.find(sceneId);
-    if (it != _scenePlayers.end())
-    {
-        it->second.erase(playerId);
-        if (it->second.empty())
-        {
-            _scenePlayers.erase(it);
-        }
-    }
-    TLOG_INFO("removeScenePlayer sceneId=" << sceneId << ", playerId=" << playerId << endl);
-}
-
-void LobbyServerApp::broadcastToScene(tars::Int32 sceneId, tars::Int64 excludePlayerId, const PushCallback& callback)
-{
-    lock_guard<mutex> lock(_pushMutex);
-    auto it = _scenePlayers.find(sceneId);
-    if (it == _scenePlayers.end())
-    {
-        TLOG_WARN("broadcastToScene: no players in scene " << sceneId << endl);
-        return;
-    }
+    // 读操作：共享锁 - 多个 pushToNotifyList 可同时执行
+    pthread_rwlock_rdlock(&_playerCurrentsRwlock);
 
     int pushed = 0;
-    for (tars::Int64 pid : it->second)
+    int total = notifyList.size();
+    
+    for (tars::Int64 targetPlayerId : notifyList)
     {
-        if (pid == excludePlayerId) continue;  // 排除发送者自己
-
-        auto cit = _playerCurrents.find(pid);
-        if (cit != _playerCurrents.end() && cit->second)
+        auto it = _playerCurrents.find(targetPlayerId);
+        if (it == _playerCurrents.end() || !it->second)
         {
-            try
-            {
-                callback(cit->second);
-                ++pushed;
-            }
-            catch (const std::exception& e)
-            {
-                TLOG_ERROR("broadcastToScene failed for playerId=" << pid << ": " << e.what() << endl);
-            }
+            continue;
+        }
+
+        try
+        {
+            // 回调执行在锁内，但回调本身是异步的（async_response_*）
+            // 这里只是调用发起，发送完成后立即返回
+            callback(it->second);
+            ++pushed;
+        }
+        catch (const std::exception& e)
+        {
+            TLOG_ERROR("pushToNotifyList failed for playerId=" << targetPlayerId << ": " << e.what() << endl);
         }
     }
-    TLOG_INFO("broadcastToScene sceneId=" << sceneId << ", exclude=" << excludePlayerId << ", pushed=" << pushed << endl);
+    pthread_rwlock_unlock(&_playerCurrentsRwlock);
+    
+    TLOG_DEBUG("pushToNotifyList pushed=" << pushed << "/" << total << endl);
 }
 
 void LobbyServerApp::bindConnId(tars::Int64 connId, tars::Int64 playerId)

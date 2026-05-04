@@ -173,14 +173,31 @@ tars::Int32 SceneImp::leaveScene(const LeaveSceneReq &req, LeaveSceneRsp &rsp, t
 // 私有方法：异步通知 LobbyServer
 //////////////////////////////////////////////////////
 
+// 计算需要通知的玩家列表（场景内除指定玩家外的所有玩家）
+vector<long> SceneImp::calcNotifyList(int sceneId, long excludePlayerId)
+{
+    vector<long> notifyList;
+    auto& globalPlayers = g_app.getGlobalPlayers();
+    for (const auto& kv : globalPlayers)
+    {
+        if (kv.second.sceneId == sceneId && kv.second.playerId != excludePlayerId)
+        {
+            notifyList.push_back(kv.second.playerId);
+        }
+    }
+    return notifyList;
+}
+
 void SceneImp::notifyPlayerEnter(long playerId, int sceneId, const PlayerInfo& player)
 {
     try
     {
-        // 使用缓存的代理直接调用，避免每次都查询服务地址
-        _lobbyPushPrx->async_onPlayerEnter(NULL, playerId, sceneId, player);
+        // 计算需要通知的玩家列表（场景内除新玩家外的所有玩家）
+        vector<long> notifyList = calcNotifyList(sceneId, playerId);
         
-        TLOG_DEBUG("SceneImp::notifyPlayerEnter sent, playerId=" << playerId << endl);
+        _lobbyPushPrx->async_onPlayerEnter(NULL, notifyList, playerId, sceneId, player);
+        
+        TLOG_DEBUG("SceneImp::notifyPlayerEnter sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
     }
     catch (exception& e)
     {
@@ -192,9 +209,12 @@ void SceneImp::notifyPlayerMove(long playerId, int sceneId, float x, float y, fl
 {
     try
     {
-        _lobbyPushPrx->async_onPlayerMove(NULL, playerId, sceneId, x, y, z);
+        // 计算需要通知的玩家列表（场景内其他玩家）
+        vector<long> notifyList = calcNotifyList(sceneId, playerId);
         
-        TLOG_DEBUG("SceneImp::notifyPlayerMove sent, playerId=" << playerId << endl);
+        _lobbyPushPrx->async_onPlayerMove(NULL, notifyList, playerId, sceneId, x, y, z);
+        
+        TLOG_DEBUG("SceneImp::notifyPlayerMove sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
     }
     catch (exception& e)
     {
@@ -206,9 +226,12 @@ void SceneImp::notifyPlayerLeave(long playerId, int sceneId)
 {
     try
     {
-        _lobbyPushPrx->async_onPlayerLeave(NULL, playerId, sceneId);
+        // 计算需要通知的玩家列表（场景内其他玩家）
+        vector<long> notifyList = calcNotifyList(sceneId, playerId);
         
-        TLOG_DEBUG("SceneImp::notifyPlayerLeave sent, playerId=" << playerId << endl);
+        _lobbyPushPrx->async_onPlayerLeave(NULL, notifyList, playerId, sceneId);
+        
+        TLOG_DEBUG("SceneImp::notifyPlayerLeave sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
     }
     catch (exception& e)
     {

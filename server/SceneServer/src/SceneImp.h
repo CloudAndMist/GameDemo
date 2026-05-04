@@ -36,6 +36,9 @@ private:
     // 缓存 LobbyServer 的推送接口代理
     Scene2LobbyPushPrx _lobbyPushPrx;
 
+    // 计算需要通知的玩家列表（场景内除指定玩家外的所有玩家）
+    vector<long> calcNotifyList(int sceneId, long excludePlayerId);
+
     // 通知 LobbyServer 有玩家进入
     void notifyPlayerEnter(long playerId, int sceneId, const PlayerInfo& player);
     

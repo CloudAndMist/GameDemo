@@ -22,18 +22,21 @@ module GameDemo
     {
         // 玩家进入场景通知
         // SceneServer 调用此接口通知 LobbyServer 有新玩家进入
-        // LobbyServer 收到后通过 PushCallback 转发给场景内其他玩家的客户端
-        int onPlayerEnter(long playerId, int sceneId, PlayerInfo player);
+        // notifyList: Scene 内除新玩家外的所有 playerId，用于 LobbyServer 通知其他玩家
+        // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
+        int onPlayerEnter(vector<long> notifyList, long playerId, int sceneId, PlayerInfo player);
 
         // 玩家移动通知
         // SceneServer 调用此接口通知 LobbyServer 有玩家移动
-        // LobbyServer 收到后通过 PushCallback 转发给场景内其他玩家的客户端
-        int onPlayerMove(long playerId, int sceneId, float x, float y, float z);
+        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
+        // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
+        int onPlayerMove(vector<long> notifyList, long playerId, int sceneId, float x, float y, float z);
 
         // 玩家离开场景通知
         // SceneServer 调用此接口通知 LobbyServer 有玩家离开
-        // LobbyServer 收到后通过 PushCallback 转发给场景内其他玩家的客户端
-        int onPlayerLeave(long playerId, int sceneId);
+        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
+        // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
+        int onPlayerLeave(vector<long> notifyList, long playerId, int sceneId);
     };
 
     // ========== Lobby2ClientPush 接口 (客户端实现，通过 PushCallback 机制被调用) ==========

@@ -365,33 +365,32 @@ tars::Int32 LobbyImp::registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _c
 }
 
 /////////////////////////////////////////////////////////////
-/// Scene2LobbyPush 实现 (接收 SceneServer 的回调)
+///// Scene2LobbyPush 实现 (接收 SceneServer 的回调)
+///// V0.2.5: SceneServer 传入 notifyList，LobbyServer 只负责推送
 /////////////////////////////////////////////////////////////
 
-tars::Int32 Scene2LobbyPushImp::onPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, tars::TarsCurrentPtr _current_)
+// V0.2.5: 根据 notifyList 推送玩家进入通知
+tars::Int32 Scene2LobbyPushImp::onPlayerEnter(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, tars::TarsCurrentPtr _current_)
 {
-    TLOG_INFO("Scene2LobbyPushImp::onPlayerEnter playerId=" << playerId << ", sceneId=" << sceneId << ", name=" << player.roleName << endl);
+    TLOG_INFO("Scene2LobbyPushImp::onPlayerEnter playerId=" << playerId << ", sceneId=" << sceneId << ", notifyCount=" << notifyList.size() << endl);
 
-    // 添加玩家到场景列表
-    g_app.addScenePlayer(sceneId, playerId);
-
-    // 广播给场景内其他玩家
     PlayerEnterNotify notify;
     notify.player = player;
     notify.timestamp = TNOW;
 
-    g_app.broadcastToScene(sceneId, playerId, [&notify](tars::TarsCurrentPtr current) {
+    // 根据 SceneServer 传入的 notifyList 推送
+    g_app.pushToNotifyList(notifyList, [&notify](tars::TarsCurrentPtr current) {
         Lobby2ClientPush::async_response_push_onPlayerEnter(current, 0, notify);
     });
 
     return 0;
 }
 
-tars::Int32 Scene2LobbyPushImp::onPlayerMove(tars::Int64 playerId, tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, tars::TarsCurrentPtr _current_)
+// V0.2.5: 根据 notifyList 推送玩家移动通知
+tars::Int32 Scene2LobbyPushImp::onPlayerMove(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, tars::TarsCurrentPtr _current_)
 {
-    TLOG_INFO("Scene2LobbyPushImp::onPlayerMove playerId=" << playerId << ", sceneId=" << sceneId << ", pos=(" << x << "," << y << "," << z << ")" << endl);
+    TLOG_INFO("Scene2LobbyPushImp::onPlayerMove playerId=" << playerId << ", sceneId=" << sceneId << ", pos=(" << x << "," << y << "," << z << "), notifyCount=" << notifyList.size() << endl);
 
-    // 广播移动给场景内其他玩家
     PlayerMoveNotify notify;
     notify.playerId = playerId;
     notify.x = x;
@@ -399,26 +398,25 @@ tars::Int32 Scene2LobbyPushImp::onPlayerMove(tars::Int64 playerId, tars::Int32 s
     notify.z = z;
     notify.timestamp = TNOW;
 
-    g_app.broadcastToScene(sceneId, playerId, [&notify](tars::TarsCurrentPtr current) {
+    // 根据 SceneServer 传入的 notifyList 推送
+    g_app.pushToNotifyList(notifyList, [&notify](tars::TarsCurrentPtr current) {
         Lobby2ClientPush::async_response_push_onPlayerMove(current, 0, notify);
     });
 
     return 0;
 }
 
-tars::Int32 Scene2LobbyPushImp::onPlayerLeave(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_)
+// V0.2.5: 根据 notifyList 推送玩家离开通知
+tars::Int32 Scene2LobbyPushImp::onPlayerLeave(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_)
 {
-    TLOG_INFO("Scene2LobbyPushImp::onPlayerLeave playerId=" << playerId << ", sceneId=" << sceneId << endl);
+    TLOG_INFO("Scene2LobbyPushImp::onPlayerLeave playerId=" << playerId << ", sceneId=" << sceneId << ", notifyCount=" << notifyList.size() << endl);
 
-    // 从场景列表移除
-    g_app.removeScenePlayer(sceneId, playerId);
-
-    // 广播离开给场景内其他玩家
     PlayerLeaveNotify notify;
     notify.playerId = playerId;
     notify.timestamp = TNOW;
 
-    g_app.broadcastToScene(sceneId, playerId, [&notify](tars::TarsCurrentPtr current) {
+    // 根据 SceneServer 传入的 notifyList 推送
+    g_app.pushToNotifyList(notifyList, [&notify](tars::TarsCurrentPtr current) {
         Lobby2ClientPush::async_response_push_onPlayerLeave(current, 0, notify);
     });
 

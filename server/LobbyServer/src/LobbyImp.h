@@ -59,6 +59,7 @@ private:
 };
 
 // Scene2LobbyPush 实现 (供 SceneServer 调用)
+// 根据 V0.2.5: SceneServer 传入 notifyList，LobbyServer 只负责根据列表推送，不持有场景状态
 class Scene2LobbyPushImp : public GameDemo::Scene2LobbyPush
 {
 public:
@@ -69,13 +70,16 @@ public:
     virtual void destroy(){};
 
     // 玩家进入场景通知
-    virtual tars::Int32 onPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const GameDemo::PlayerInfo& player, tars::TarsCurrentPtr _current_);
+    // notifyList: Scene 内除新玩家外的所有 playerId，由 SceneServer 计算并传入
+    virtual tars::Int32 onPlayerEnter(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, const GameDemo::PlayerInfo& player, tars::TarsCurrentPtr _current_);
 
     // 玩家移动通知
-    virtual tars::Int32 onPlayerMove(tars::Int64 playerId, tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, tars::TarsCurrentPtr _current_);
+    // notifyList: Scene 内其他玩家的 playerId，由 SceneServer 计算并传入
+    virtual tars::Int32 onPlayerMove(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, tars::TarsCurrentPtr _current_);
 
     // 玩家离开场景通知
-    virtual tars::Int32 onPlayerLeave(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
+    // notifyList: Scene 内其他玩家的 playerId，由 SceneServer 计算并传入
+    virtual tars::Int32 onPlayerLeave(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
 };
 
 #endif

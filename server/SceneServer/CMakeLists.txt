@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(Demo-DemoServer)
+project(GameDemo-SceneServer)
 
 option(TARS_MYSQL "option for mysql" ON)
 option(TARS_SSL "option for ssl" OFF)
