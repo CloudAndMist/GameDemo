@@ -17,12 +17,6 @@ module GameDemo
         // 移动 (LobbyServer 调用)
         int move(MoveReq req, out MoveRsp rsp);
 
-        // 心跳 (LobbyServer 调用)
-        int heartbeat(HeartBeatReq req);
-
-        // 获取场景玩家列表 (LobbyServer 调用)
-        int getScenePlayers(long playerId, int sceneId, out GetScenePlayersRsp rsp);
-
         // 离开场景 (LobbyServer 调用)
         int leaveScene(LeaveSceneReq req, out LeaveSceneRsp rsp);
     };

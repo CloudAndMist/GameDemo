@@ -24,6 +24,7 @@
 #include <functional>
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 #include "GameDemoBase.h"
 #include "Lobby.h"
@@ -105,6 +106,8 @@ public:
         , _inScene(false)
         , _running(true)
         , _heartbeatThread(nullptr)
+        , _curX(0.0f)
+        , _curY(0.0f)
     {
         // 设置 Tars 框架定位器
         _comm->setProperty("locator", "tars.tarsregistry.QueryObj@tcp -h tars-framework -p 17890");
@@ -210,6 +213,8 @@ public:
         _accountId = 0;
         _playerId = 0;
         _sceneId = 0;
+        _curX = 0.0f;
+        _curY = 0.0f;
         stopHeartbeat();
     }
     
@@ -372,6 +377,8 @@ public:
             if (ret == 0) {
                 _inScene = true;
                 _sceneId = sceneId;
+                _curX = rsp.self.x;
+                _curY = rsp.self.y;
                 LOG_OK("进入场景成功!");
                 cout << "  场景ID: " << sceneId << endl;
                 cout << "  自身位置: (" << rsp.self.x << ", " << rsp.self.y << ", " << rsp.self.z << ")" << endl;
@@ -449,6 +456,8 @@ public:
             
             if (ret == 0) {
                 _inScene = false;
+                _curX = 0.0f;
+                _curY = 0.0f;
                 LOG_OK("离开场景成功!");
                 return true;
             } else {
@@ -603,6 +612,7 @@ public:
             
             // ==================== 退出 ====================
             if (op == "quit" || op == "exit") {
+                leaveScene();
                 cleanup();
                 cout << "再见!" << endl;
                 break;
@@ -653,6 +663,7 @@ public:
             }
             
             else if (op == "logout") {
+                leaveScene();
                 logout();
                 LOG_OK("已登出");
             }
@@ -706,16 +717,29 @@ public:
                 if (!_inScene) {
                     LOG_ERR("请先进入场景!");
                 } else {
-                    LOG_INFO("启动随机移动 (后台线程, 3秒间隔)");
+                    LOG_INFO("启动随机移动 (后台线程, 3秒间隔, 步幅<=5, 范围0-999)");
                     thread([this]() {
                         while (_running && _inScene) {
                             this_thread::sleep_for(chrono::seconds(3));
                             if (!_running || !_inScene) break;
                             
-                            float x = static_cast<float>(rand() % 200 - 100);
-                            float y = static_cast<float>(rand() % 200 - 100);
-                            float z = static_cast<float>(rand() % 50 - 25);
-                            move(x, y, z);
+                            // 随机偏移量 [-5, 5]
+                            float dx = static_cast<float>((rand() % 11) - 5);
+                            float dy = static_cast<float>((rand() % 11) - 5);
+                            float z = static_cast<float>(rand() % 10);  // z 保持 0-9 范围
+                            
+                            // 计算新位置，确保在 [0, 999] 范围内
+                            float newX = _curX + dx;
+                            float newY = _curY + dy;
+                            
+                            // 边界环绕 (0-999 循环)
+                            newX = fmodf(newX + 1000, 1000);
+                            newY = fmodf(newY + 1000, 1000);
+                            
+                            if (move(newX, newY, z)) {
+                                _curX = newX;
+                                _curY = newY;
+                            }
                         }
                     }).detach();
                 }
@@ -760,6 +784,8 @@ private:
     bool _inScene;
     atomic<bool> _running;
     thread* _heartbeatThread;
+    float _curX;  // 当前 X 坐标 (0-999)
+    float _curY;  // 当前 Y 坐标 (0-999)
 };
 
 int main(int argc, char* argv[])

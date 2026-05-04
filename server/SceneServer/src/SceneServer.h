@@ -1,46 +1,23 @@
 ﻿#ifndef _SceneServer_H_
 #define _SceneServer_H_
 
-#include <iostream>
-#include <map>
-#include <mutex>
 #include "servant/Application.h"
-
-using namespace tars;
-
-/**
- * 全局共享的玩家数据管理器
- */
-struct GlobalPlayerData
-{
-    tars::Int64 playerId;
-    tars::Int32 sceneId;
-    tars::Int32 level;
-    float x, y, z;
-    tars::Int64 lastHeartbeat;
-};
+#include "PlayerManager.h"
 
 class SceneServer : public Application
 {
 public:
     ~SceneServer() {};
 
-    // 全局玩家数据访问接口
-    std::map<tars::Int64, GlobalPlayerData>& getGlobalPlayers();
-
-    void addPlayer(tars::Int64 playerId, const GlobalPlayerData& data);
-    void removePlayer(tars::Int64 playerId);
-    GlobalPlayerData* getPlayer(tars::Int64 playerId);
-    void updatePlayerPosition(tars::Int64 playerId, float x, float y, float z);
-    void updateHeartbeat(tars::Int64 playerId);
+    // 获取玩家管理器（全局单例，供所有 SceneImp 共享）
+    PlayerManager& getPlayerManager() { return _playerManager; }
 
 public:
     virtual void initialize();
     virtual void destroyApp();
 
 private:
-    std::map<tars::Int64, GlobalPlayerData> _globalPlayers;
-    std::mutex _globalMutex;
+    PlayerManager _playerManager;  // 全局唯一的玩家管理器
 };
 
 extern SceneServer g_app;

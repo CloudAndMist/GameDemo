@@ -2,15 +2,17 @@
 #include "SceneServer.h"
 #include "servant/Application.h"
 #include "Push.h"
-#include <chrono>
 
 using namespace std;
 using namespace GameDemo;
 
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 void SceneImp::initialize()
 {
     TLOG_DEBUG("SceneImp::initialize" << endl);
+
+    // 缓存 PlayerManager 指针（初始化顺序保证：SceneServer::initialize() 先执行）
+    _playerMgr = &g_app.getPlayerManager();
 
     // 初始化时获取 LobbyServer 代理并缓存，避免每次调用都查询服务地址
     try
@@ -26,64 +28,55 @@ void SceneImp::initialize()
     }
 }
 
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 void SceneImp::destroy()
 {
     TLOG_DEBUG("SceneImp::destroy" << endl);
 }
 
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 tars::Int32 SceneImp::enterScene(const EnterSceneReq &req, EnterSceneRsp &rsp, tars::TarsCurrentPtr _current_)
 {
     TLOG_DEBUG("SceneImp::enterScene playerId=" << req.playerId << ", sceneId=" << req.sceneId << endl);
 
     rsp.ret = 0;
     rsp.msg = "success";
+    rsp.self = {};
     rsp.self.playerId = req.playerId;
     rsp.self.sceneId = req.sceneId;
     rsp.self.level = 1;
-    rsp.self.x = 0.0f;
-    rsp.self.y = 0.0f;
-    rsp.self.z = 0.0f;
 
-    // 添加玩家到全局数据
-    GlobalPlayerData playerData;
-    playerData.playerId = req.playerId;
-    playerData.sceneId = req.sceneId;
-    playerData.level = 1;
-    playerData.x = 0.0f;
-    playerData.y = 0.0f;
-    playerData.z = 0.0f;
-    playerData.lastHeartbeat = chrono::duration_cast<chrono::milliseconds>(
-        chrono::system_clock::now().time_since_epoch()).count();
+    // 通过 PlayerManager 添加玩家（一次性完成数据和 AOI 格子添加）
+    _playerMgr->playerEnter(req.playerId, 0.0f, 0.0f, 0.0f, req.sceneId, 1);
 
-    g_app.addPlayer(req.playerId, playerData);
+    // 获取视野内玩家
+    vector<tars::Int64> viewPlayers = _playerMgr->getViewPlayers(req.playerId);
 
-    // 获取场景中其他玩家，填充响应
-    auto& globalPlayers = g_app.getGlobalPlayers();
-    for (const auto &kv : globalPlayers)
+    // 填充视野内其他玩家信息
+    for (tars::Int64 pid : viewPlayers)
     {
-        if (kv.second.playerId != req.playerId)
+        auto* p = _playerMgr->getPlayer(pid);
+        if (p)
         {
             PlayerInfo info;
-            info.playerId = kv.second.playerId;
-            info.sceneId = kv.second.sceneId;
-            info.level = kv.second.level;
-            info.x = kv.second.x;
-            info.y = kv.second.y;
-            info.z = kv.second.z;
+            info.playerId = p->playerId;
+            info.sceneId = p->sceneId;
+            info.level = p->level;
+            info.x = p->x;
+            info.y = p->y;
+            info.z = p->z;
             rsp.players.push_back(info);
         }
     }
 
     // 异步通知 LobbyServer 有新玩家进入
-    notifyPlayerEnter(req.playerId, req.sceneId, rsp.self);
+    notifyPlayerEnter(req.playerId, req.sceneId, rsp.self, viewPlayers);
 
     TLOG_DEBUG("SceneImp::enterScene success, playerId=" << req.playerId << ", otherPlayers=" << rsp.players.size() << endl);
     return 0;
 }
 
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 tars::Int32 SceneImp::move(const MoveReq &req, MoveRsp &rsp, tars::TarsCurrentPtr _current_)
 {
     TLOG_DEBUG("SceneImp::move playerId=" << req.playerId << ", x=" << req.x << ", y=" << req.y << ", z=" << req.z << endl);
@@ -91,59 +84,23 @@ tars::Int32 SceneImp::move(const MoveReq &req, MoveRsp &rsp, tars::TarsCurrentPt
     rsp.ret = 0;
     rsp.msg = "success";
 
-    // 更新玩家位置（全局）
-    g_app.updatePlayerPosition(req.playerId, req.x, req.y, req.z);
+    // 更新玩家位置（一次性完成数据和 AOI 格子更新）
+    _playerMgr->playerMove(req.playerId, req.x, req.y, req.z);
+
+    // 获取视野内玩家
+    vector<tars::Int64> viewPlayers = _playerMgr->getViewPlayers(req.playerId);
 
     // 异步通知 LobbyServer 有玩家移动
-    auto* player = g_app.getPlayer(req.playerId);
+    auto* player = _playerMgr->getPlayer(req.playerId);
     if (player)
     {
-        notifyPlayerMove(req.playerId, player->sceneId, req.x, req.y, req.z);
+        notifyPlayerMove(req.playerId, player->sceneId, req.x, req.y, req.z, viewPlayers);
     }
 
     return 0;
 }
 
-//////////////////////////////////////////////////////
-tars::Int32 SceneImp::heartbeat(const HeartBeatReq &req, tars::TarsCurrentPtr _current_)
-{
-    g_app.updateHeartbeat(req.playerId);
-    return 0;
-}
-
-//////////////////////////////////////////////////////
-tars::Int32 SceneImp::getScenePlayers(tars::Int64 playerId, tars::Int32 sceneId, GetScenePlayersRsp &rsp, tars::TarsCurrentPtr _current_)
-{
-    TLOG_DEBUG("SceneImp::getScenePlayers playerId=" << playerId << ", sceneId=" << sceneId << endl);
-
-    rsp.ret = 0;
-    rsp.msg = "success";
-    rsp.players.clear();
-
-    auto& globalPlayers = g_app.getGlobalPlayers();
-    TLOG_DEBUG("SceneImp::getScenePlayers globalPlayers.size()=" << globalPlayers.size() << endl);
-
-    for (const auto &kv : globalPlayers)
-    {
-        if (kv.second.sceneId == sceneId)
-        {
-            PlayerInfo info;
-            info.playerId = kv.second.playerId;
-            info.sceneId = kv.second.sceneId;
-            info.level = kv.second.level;
-            info.x = kv.second.x;
-            info.y = kv.second.y;
-            info.z = kv.second.z;
-            rsp.players.push_back(info);
-        }
-    }
-
-    TLOG_DEBUG("SceneImp::getScenePlayers returning players.size()=" << rsp.players.size() << endl);
-
-    return 0;
-}
-
-////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 tars::Int32 SceneImp::leaveScene(const LeaveSceneReq &req, LeaveSceneRsp &rsp, tars::TarsCurrentPtr _current_)
 {
     TLOG_DEBUG("SceneImp::leaveScene playerId=" << req.playerId << ", sceneId=" << req.sceneId << endl);
@@ -152,51 +109,36 @@ tars::Int32 SceneImp::leaveScene(const LeaveSceneReq &req, LeaveSceneRsp &rsp, t
     rsp.msg = "success";
 
     // 获取玩家信息用于通知
-    auto* player = g_app.getPlayer(req.playerId);
-    int sceneId = req.sceneId;
+    auto* player = _playerMgr->getPlayer(req.playerId);
+    tars::Int32 sceneId = req.sceneId;
     if (player)
     {
         sceneId = player->sceneId;
     }
 
-    // 从全局数据中移除玩家
-    g_app.removePlayer(req.playerId);
+    // 获取离开前需要通知的玩家（此时玩家还在 AOI 中）
+    vector<tars::Int64> notifyList = _playerMgr->getViewPlayers(req.playerId);
+
+    // 从玩家管理器移除（一次性完成 AOI 格子移除和数据移除）
+    _playerMgr->playerLeave(req.playerId);
 
     // 异步通知 LobbyServer 有玩家离开
-    notifyPlayerLeave(req.playerId, sceneId);
+    notifyPlayerLeave(req.playerId, sceneId, notifyList);
 
     TLOG_DEBUG("SceneImp::leaveScene success, playerId=" << req.playerId << endl);
     return 0;
 }
 
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // 私有方法：异步通知 LobbyServer
-//////////////////////////////////////////////////////
+//////////////////////////////////////////////////
 
-// 计算需要通知的玩家列表（场景内除指定玩家外的所有玩家）
-vector<long> SceneImp::calcNotifyList(int sceneId, long excludePlayerId)
-{
-    vector<long> notifyList;
-    auto& globalPlayers = g_app.getGlobalPlayers();
-    for (const auto& kv : globalPlayers)
-    {
-        if (kv.second.sceneId == sceneId && kv.second.playerId != excludePlayerId)
-        {
-            notifyList.push_back(kv.second.playerId);
-        }
-    }
-    return notifyList;
-}
-
-void SceneImp::notifyPlayerEnter(long playerId, int sceneId, const PlayerInfo& player)
+void SceneImp::notifyPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList)
 {
     try
     {
-        // 计算需要通知的玩家列表（场景内除新玩家外的所有玩家）
-        vector<long> notifyList = calcNotifyList(sceneId, playerId);
-        
         _lobbyPushPrx->async_onPlayerEnter(NULL, notifyList, playerId, sceneId, player);
-        
+
         TLOG_DEBUG("SceneImp::notifyPlayerEnter sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
     }
     catch (exception& e)
@@ -205,15 +147,12 @@ void SceneImp::notifyPlayerEnter(long playerId, int sceneId, const PlayerInfo& p
     }
 }
 
-void SceneImp::notifyPlayerMove(long playerId, int sceneId, float x, float y, float z)
+void SceneImp::notifyPlayerMove(tars::Int64 playerId, tars::Int32 sceneId, float x, float y, float z, const vector<tars::Int64>& notifyList)
 {
     try
     {
-        // 计算需要通知的玩家列表（场景内其他玩家）
-        vector<long> notifyList = calcNotifyList(sceneId, playerId);
-        
         _lobbyPushPrx->async_onPlayerMove(NULL, notifyList, playerId, sceneId, x, y, z);
-        
+
         TLOG_DEBUG("SceneImp::notifyPlayerMove sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
     }
     catch (exception& e)
@@ -222,15 +161,12 @@ void SceneImp::notifyPlayerMove(long playerId, int sceneId, float x, float y, fl
     }
 }
 
-void SceneImp::notifyPlayerLeave(long playerId, int sceneId)
+void SceneImp::notifyPlayerLeave(tars::Int64 playerId, tars::Int32 sceneId, const vector<tars::Int64>& notifyList)
 {
     try
     {
-        // 计算需要通知的玩家列表（场景内其他玩家）
-        vector<long> notifyList = calcNotifyList(sceneId, playerId);
-        
         _lobbyPushPrx->async_onPlayerLeave(NULL, notifyList, playerId, sceneId);
-        
+
         TLOG_DEBUG("SceneImp::notifyPlayerLeave sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
     }
     catch (exception& e)

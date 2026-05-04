@@ -1,82 +1,31 @@
 ﻿#include "SceneServer.h"
 #include "SceneImp.h"
-#include <chrono>
-
-using namespace std;
 
 SceneServer g_app;
 
-///////////////////////////////////////////////////////////
-std::map<tars::Int64, GlobalPlayerData>& SceneServer::getGlobalPlayers()
-{
-    return _globalPlayers;
-}
-
-void SceneServer::addPlayer(tars::Int64 playerId, const GlobalPlayerData& data)
-{
-    lock_guard<mutex> lock(_globalMutex);
-    _globalPlayers[playerId] = data;
-}
-
-void SceneServer::removePlayer(tars::Int64 playerId)
-{
-    lock_guard<mutex> lock(_globalMutex);
-    _globalPlayers.erase(playerId);
-}
-
-GlobalPlayerData* SceneServer::getPlayer(tars::Int64 playerId)
-{
-    lock_guard<mutex> lock(_globalMutex);
-    auto it = _globalPlayers.find(playerId);
-    if (it != _globalPlayers.end())
-    {
-        return &it->second;
-    }
-    return nullptr;
-}
-
-void SceneServer::updatePlayerPosition(tars::Int64 playerId, float x, float y, float z)
-{
-    lock_guard<mutex> lock(_globalMutex);
-    auto it = _globalPlayers.find(playerId);
-    if (it != _globalPlayers.end())
-    {
-        it->second.x = x;
-        it->second.y = y;
-        it->second.z = z;
-    }
-}
-
-void SceneServer::updateHeartbeat(tars::Int64 playerId)
-{
-    lock_guard<mutex> lock(_globalMutex);
-    auto it = _globalPlayers.find(playerId);
-    if (it != _globalPlayers.end())
-    {
-        it->second.lastHeartbeat = chrono::duration_cast<chrono::milliseconds>(
-            chrono::system_clock::now().time_since_epoch()).count();
-    }
-}
-
-///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 void SceneServer::initialize()
 {
     TLOG_DEBUG("SceneServer::initialize" << endl);
+
+    // 初始化玩家管理器（在 SceneServer 层初始化，确保全局唯一）
+    // TODO: 配置化（从配置文件读取）
+    _playerManager.init(1000, 1000, 10.0f);  // 场景 1000x1000，格子 10x10
 
     // 注册 SceneServant 接口
     addServant<SceneImp>(ServerConfig::Application + "." + ServerConfig::ServerName + ".SceneObj");
 }
 
-///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 void SceneServer::destroyApp()
 {
     TLOG_DEBUG("SceneServer::destroyApp" << endl);
 
-    lock_guard<mutex> lock(_globalMutex);
-    _globalPlayers.clear();
+    // 清空玩家管理器
+    _playerManager.clear();
 }
 
-///////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
     try
