@@ -133,18 +133,18 @@ public:
         // 初始化随机数种子
         srand(static_cast<unsigned>(time(nullptr)));
 
-        // 注册 Push 回调
-        registerPushCallback();
+        // 设置 Push 回调 (框架层)
+        setPushCallback();
     }
 
-    // 注册 Push 回调
-    void registerPushCallback() {
+    // 设置 Push 回调 (框架层：定义收到推送后的处理逻辑)
+    void setPushCallback() {
         try {
             _pushCallback = new LobbyPushCallback();
             _lobbyPrx->tars_set_push_callback(_pushCallback);
-            LOG_INFO("Push 回调注册成功");
+            LOG_INFO("Push 回调设置成功");
         } catch (const std::exception& e) {
-            LOG_WARN("Push 回调注册失败: " << string(e.what()));
+            LOG_WARN("Push 回调设置失败: " << string(e.what()));
         }
     }
     
@@ -358,13 +358,13 @@ public:
                 cout << "  playerId: " << _playerId << endl;
                 cout << "  roleName: " << rsp.role.roleName << endl;
 
-                // 选择角色后注册推送回调
+                // 选择角色后注册服务端推送
                 if (_playerId > 0) {
                     try {
                         _lobbyPrx->registerPush(_playerId);
-                        LOG_INFO("推送回调注册成功!");
+                        LOG_INFO("服务端推送注册成功!");
                     } catch (const std::exception& e) {
-                        LOG_WARN("推送回调注册失败: " << e.what());
+                        LOG_WARN("服务端推送注册失败: " << e.what());
                     }
                 }
 
