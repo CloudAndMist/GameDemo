@@ -174,3 +174,95 @@ void SceneImp::notifyPlayerLeave(tars::Int64 playerId, tars::Int32 sceneId, cons
         TLOG_ERROR("SceneImp::notifyPlayerLeave error: " << e.what() << endl);
     }
 }
+
+void SceneImp::notifyPlayerOffline(tars::Int64 playerId, tars::Int32 sceneId, const vector<tars::Int64>& notifyList)
+{
+    try
+    {
+        _lobbyPushPrx->async_onPlayerOffline(NULL, notifyList, playerId, sceneId);
+
+        TLOG_DEBUG("SceneImp::notifyPlayerOffline sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
+    }
+    catch (exception& e)
+    {
+        TLOG_ERROR("SceneImp::notifyPlayerOffline error: " << e.what() << endl);
+    }
+}
+
+void SceneImp::notifyPlayerOnline(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList)
+{
+    try
+    {
+        _lobbyPushPrx->async_onPlayerOnline(NULL, notifyList, playerId, sceneId, player);
+
+        TLOG_DEBUG("SceneImp::notifyPlayerOnline sent, playerId=" << playerId << ", notifyList size=" << notifyList.size() << endl);
+    }
+    catch (exception& e)
+    {
+        TLOG_ERROR("SceneImp::notifyPlayerOnline error: " << e.what() << endl);
+    }
+}
+
+//============================================================
+tars::Int32 SceneImp::playerOffline(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_)
+{
+    TLOG_INFO("SceneImp::playerOffline playerId=" << playerId
+              << ", sceneId=" << sceneId << endl);
+
+    // 获取玩家并检查状态
+    auto* player = _playerMgr->getPlayer(playerId);
+    if (!player) {
+        TLOG_WARN("playerOffline: player not found, playerId=" << playerId << endl);
+        return -1;
+    }
+
+    // V0.4: 检查玩家是否已经是离线状态，避免重复通知
+    if (!player->isOnline) {
+        TLOG_INFO("playerOffline: player already offline, skip, playerId=" << playerId << endl);
+        return 0;
+    }
+
+    // 标记为离线（不改变 AOI 结构，只改变状态标志）
+    _playerMgr->setOnline(playerId, false);
+
+    // 通知周围玩家该玩家掉线
+    vector<tars::Int64> notifyList = _playerMgr->getViewPlayers(playerId);
+    if (!notifyList.empty()) {
+        notifyPlayerOffline(playerId, sceneId, notifyList);
+    }
+
+    TLOG_INFO("SceneImp::playerOffline success, playerId=" << playerId << endl);
+    return 0;
+}
+
+tars::Int32 SceneImp::playerOnline(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_)
+{
+    TLOG_INFO("SceneImp::playerOnline playerId=" << playerId
+              << ", sceneId=" << sceneId << endl);
+
+    // 获取玩家并检查状态
+    auto* player = _playerMgr->getPlayer(playerId);
+    if (!player) {
+        TLOG_WARN("playerOnline: player not found, playerId=" << playerId << endl);
+        return -1;
+    }
+
+    // V0.4: 检查玩家是否已经在线，避免重复通知
+    if (player->isOnline) {
+        TLOG_INFO("playerOnline: player already online, skip, playerId=" << playerId << endl);
+        return 0;
+    }
+
+    // 标记为在线（不改变 AOI 结构，只改变状态标志）
+    _playerMgr->setOnline(playerId, true);
+
+    // 通知周围玩家该玩家重连
+    vector<tars::Int64> notifyList = _playerMgr->getViewPlayers(playerId);
+    if (!notifyList.empty()) {
+        PlayerInfo playerInfo = _playerMgr->toPlayerInfo(*player);
+        notifyPlayerOnline(playerId, sceneId, playerInfo, notifyList);
+    }
+
+    TLOG_INFO("SceneImp::playerOnline success, playerId=" << playerId << endl);
+    return 0;
+}

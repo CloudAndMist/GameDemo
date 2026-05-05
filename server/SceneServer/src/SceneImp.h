@@ -31,6 +31,8 @@ public:
     virtual tars::Int32 enterScene(const EnterSceneReq &req, EnterSceneRsp &rsp, tars::TarsCurrentPtr _current_) override;
     virtual tars::Int32 move(const MoveReq &req, MoveRsp &rsp, tars::TarsCurrentPtr _current_) override;
     virtual tars::Int32 leaveScene(const LeaveSceneReq &req, LeaveSceneRsp &rsp, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 playerOffline(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 playerOnline(tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_) override;
 
 private:
     // 缓存常用组件指针（由 SceneServer 统一管理生命周期）
@@ -45,6 +47,12 @@ private:
 
     // 通知 LobbyServer 有玩家离开（notifyList 由调用方计算并传入）
     void notifyPlayerLeave(tars::Int64 playerId, tars::Int32 sceneId, const vector<tars::Int64>& notifyList);
+
+    // 通知 LobbyServer 有玩家掉线（notifyList 由调用方计算并传入）
+    void notifyPlayerOffline(tars::Int64 playerId, tars::Int32 sceneId, const vector<tars::Int64>& notifyList);
+
+    // 通知 LobbyServer 有玩家重连（notifyList 由调用方计算并传入）
+    void notifyPlayerOnline(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList);
 };
 
 #endif

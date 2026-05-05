@@ -27,6 +27,7 @@ module GameDemo
         2 optional long accountId;
         3 optional long playerId;
         4 optional string qqNumber;
+        5 optional long sessionKey;      // V0.4: 会话密钥
     };
 
     // 注册请求

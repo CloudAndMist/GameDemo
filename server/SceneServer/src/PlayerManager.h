@@ -6,6 +6,9 @@
 #include <vector>
 #include <pthread.h>
 #include <cstdint>
+#include "GameDemoBase.h"
+
+using namespace GameDemo;
 
 /**
  * 玩家数据
@@ -16,6 +19,7 @@ struct GlobalPlayerData
     int32_t sceneId;
     int32_t level;
     float x, y, z;
+    bool isOnline;  // 是否在线（用于断线重连）
 };
 
 /**
@@ -60,6 +64,17 @@ public:
      * 获取玩家数据
      */
     GlobalPlayerData* getPlayer(int64_t playerId);
+
+    /**
+     * 设置玩家在线状态（用于断线重连）
+     * 注意：断线和重连不改变 AOI 结构，只改变此标志
+     */
+    void setOnline(int64_t playerId, bool online);
+
+    /**
+     * 将玩家数据转换为 PlayerInfo（用于通知）
+     */
+    PlayerInfo toPlayerInfo(const GlobalPlayerData& data);
 
     // ========== 初始化/清理 ==========
 

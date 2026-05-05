@@ -4,24 +4,9 @@
 #include "DB.h"
 #include "Scene.h"
 
-using namespace std;
 using namespace GameDemo;
 
 extern LobbyServerApp g_app;
-
-///////////////////////////////////////////////////////////
-tars::Int32 LobbyImp::onConnect(tars::Int64 connId, tars::TarsCurrentPtr _current_)
-{
-    TLOG_DEBUG("LobbyImp::onConnect connId=" << connId << endl);
-    return 0;
-}
-
-tars::Int32 LobbyImp::onClose(tars::Int64 connId, tars::TarsCurrentPtr _current_)
-{
-    TLOG_DEBUG("LobbyImp::onClose connId=" << connId << endl);
-    g_app.unbindConnId(connId);
-    return 0;
-}
 
 tars::Int32 LobbyImp::login(const LoginReq &req, LoginRsp &rsp, tars::TarsCurrentPtr _current_)
 {
@@ -55,12 +40,18 @@ tars::Int32 LobbyImp::login(const LoginReq &req, LoginRsp &rsp, tars::TarsCurren
             return rsp.ret;
         }
 
+        // V0.4: 创建 Session
+        tars::Int64 sessionKey = TNOW;  // 使用时间戳作为 sessionKey
+        g_app.createSession(account.id, sessionKey);
+
         rsp.ret = 0;
         rsp.msg = "Login success";
         rsp.accountId = account.id;
+        rsp.playerId = account.id;
         rsp.qqNumber = account.qqNumber;
+        rsp.sessionKey = sessionKey;
 
-        TLOG_DEBUG("Login success, accountId=" << rsp.accountId << endl);
+        TLOG_DEBUG("Login success, accountId=" << rsp.accountId << ", sessionKey=" << sessionKey << endl);
         return 0;
     }
     catch (exception& e)
@@ -237,7 +228,20 @@ tars::Int32 LobbyImp::selectRole(const SelectRoleReq &req, SelectRoleRsp &rsp, t
 
 tars::Int32 LobbyImp::heartbeat(const HeartBeatReq &req, tars::TarsCurrentPtr _current_)
 {
-    TLOG_DEBUG("LobbyImp::heartbeat playerId=" << req.playerId << endl);
+    TLOG_DEBUG("LobbyImp::heartbeat playerId=" << req.playerId << ", sessionKey=" << req.sessionKey << endl);
+    
+    // V0.4: 验证 sessionKey
+    if (!g_app.validateSession(req.playerId, req.sessionKey))
+    {
+        TLOG_ERROR("LobbyImp::heartbeat: invalid session, playerId=" << req.playerId 
+                   << ", sessionKey=" << req.sessionKey << endl);
+        return -1;
+    }
+    
+    // V0.4: 更新心跳时间戳
+    // 如果玩家是重连（之前离线），会恢复在线状态
+    g_app.updateHeartbeat(req.playerId);
+    
     return 0;
 }
 
@@ -256,6 +260,16 @@ tars::Int32 LobbyImp::enterScene(tars::Int64 playerId, tars::Int32 sceneId, Ente
             );
         }
 
+        // V0.4: 验证 Session 存在（Session 在 login 时已创建）
+        PlayerSession* session = g_app.getSession(playerId);
+        if (!session)
+        {
+            TLOG_ERROR("LobbyImp::enterScene: session not found, playerId=" << playerId << endl);
+            rsp.ret = -1;
+            rsp.msg = "session not found";
+            return -1;
+        }
+
         // 构建请求
         EnterSceneReq req;
         req.playerId = playerId;
@@ -266,7 +280,9 @@ tars::Int32 LobbyImp::enterScene(tars::Int64 playerId, tars::Int32 sceneId, Ente
 
         if (ret == 0)
         {
-            TLOG_DEBUG("LobbyImp::enterScene success, playerId=" << playerId << endl);
+            // V0.4: 更新 session 中的 sceneId
+            g_app.updateSceneId(playerId, sceneId);
+            TLOG_DEBUG("LobbyImp::enterScene success, playerId=" << playerId << ", sceneId=" << sceneId << endl);
         }
         else
         {
@@ -297,6 +313,8 @@ tars::Int32 LobbyImp::move(const MoveReq &req, MoveRsp &rsp, tars::TarsCurrentPt
                 "GameDemo.SceneServer.SceneObj"
             );
         }
+
+        // V0.4: 位置信息由 SceneServer 维护，LobbyServer 不再存储
 
         // 调用 SceneServer
         tars::Int32 ret = _scenePrx->move(req, rsp);
@@ -334,7 +352,9 @@ tars::Int32 LobbyImp::leaveScene(tars::Int64 playerId, tars::Int32 sceneId, Leav
 
         if (ret == 0)
         {
-            TLOG_DEBUG("LobbyImp::leaveScene success, playerId=" << playerId << endl);
+            // V0.4: 离开场景只是把 sceneId 设为 -1，保留 session
+            g_app.updateSceneId(playerId, -1);
+            TLOG_DEBUG("LobbyImp::leaveScene success, playerId=" << playerId << ", sceneId=-1 (none)" << endl);
         }
         else
         {
@@ -419,6 +439,60 @@ tars::Int32 Scene2LobbyPushImp::onPlayerLeave(const vector<tars::Int64>& notifyL
     g_app.pushToNotifyList(notifyList, [&notify](tars::TarsCurrentPtr current) {
         Lobby2ClientPush::async_response_push_onPlayerLeave(current, 0, notify);
     });
+
+    return 0;
+}
+
+// V0.4: 推送玩家掉线通知
+tars::Int32 Scene2LobbyPushImp::onPlayerOffline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_)
+{
+    TLOG_INFO("Scene2LobbyPushImp::onPlayerOffline playerId=" << playerId << ", sceneId=" << sceneId << ", notifyCount=" << notifyList.size() << endl);
+
+    // 更新 LobbyServer 内部状态
+    g_app.setPlayerOffline(playerId);
+
+    // 推送掉线通知给周围玩家
+    PlayerOfflineNotify notify;
+    notify.playerId = playerId;
+    notify.timestamp = TNOW;
+
+    g_app.pushToNotifyList(notifyList, [&notify](tars::TarsCurrentPtr current) {
+        Lobby2ClientPush::async_response_push_onPlayerOffline(current, 0, notify);
+    });
+
+    // 推送掉线通知给掉线玩家自己（让其显示掉线状态）
+    tars::TarsCurrentPtr selfCurrent = g_app.getPlayerCurrent(playerId);
+    if (selfCurrent)
+    {
+        Lobby2ClientPush::async_response_push_onPlayerOffline(selfCurrent, 0, notify);
+    }
+
+    return 0;
+}
+
+// V0.4: 推送玩家重连通知
+tars::Int32 Scene2LobbyPushImp::onPlayerOnline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, tars::TarsCurrentPtr _current_)
+{
+    TLOG_INFO("Scene2LobbyPushImp::onPlayerOnline playerId=" << playerId << ", sceneId=" << sceneId << ", notifyCount=" << notifyList.size() << endl);
+
+    // 更新 LobbyServer 内部状态
+    g_app.setPlayerOnline(playerId);
+
+    // 推送重连通知给周围玩家
+    PlayerEnterNotify notify;
+    notify.player = player;
+    notify.timestamp = TNOW;
+
+    g_app.pushToNotifyList(notifyList, [&notify](tars::TarsCurrentPtr current) {
+        Lobby2ClientPush::async_response_push_onPlayerOnline(current, 0, notify);
+    });
+
+    // 推送重连通知给重连玩家自己（让其显示在线状态）
+    tars::TarsCurrentPtr selfCurrent = g_app.getPlayerCurrent(playerId);
+    if (selfCurrent)
+    {
+        Lobby2ClientPush::async_response_push_onPlayerOnline(selfCurrent, 0, notify);
+    }
 
     return 0;
 }

@@ -1,15 +1,27 @@
 ﻿#ifndef _LobbyServer_H_
 #define _LobbyServer_H_
 
-#include <iostream>
-#include <unordered_map>
-#include <pthread.h>
-#include <functional>
 #include "servant/Application.h"
 #include "Lobby.h"
+#include "HeartbeatThread.h"  // 同目录
+#include "Scene.h"
 
 using namespace tars;
 using namespace GameDemo;
+
+/**
+ * Session 数据结构 - V0.4 心跳与断线重连
+ * 存储连接状态和场景信息（位置由 SceneServer 维护）
+ */
+struct PlayerSession
+{
+    tars::Int64 playerId;          // 玩家ID
+    tars::Int64 sessionKey;        // 会话密钥（基于登录时间戳生成）
+    tars::Int64 lastHeartbeat;     // 最后心跳时间戳
+    bool isOnline;                 // 是否在线（true=在线，false=掉线但Session未清除）
+    tars::Int32 sceneId;           // V0.4: 当前所在场景ID（-1=不在任何场景）
+    tars::Int64 offlineTime;       // 掉线时间戳（用于30s后清除）
+};
 
 class LobbyServerApp : public Application
 {
@@ -18,12 +30,6 @@ public:
 
     virtual void initialize();
     virtual void destroyApp();
-
-    // connId -> playerId 映射管理
-    void bindConnId(tars::Int64 connId, tars::Int64 playerId);
-    void unbindConnId(tars::Int64 connId);
-    tars::Int64 getPlayerIdByConnId(tars::Int64 connId);
-    tars::Int64 getConnIdByPlayerId(tars::Int64 playerId);
 
     // ========== 推送管理 ==========
     // 注册客户端连接 (用于推送) - 写操作
@@ -39,18 +45,60 @@ public:
     // 使用读写锁支持多线程并行读
     void pushToNotifyList(const vector<tars::Int64>& notifyList, const PushCallback& callback);
 
+    // ========== Session 管理 (V0.4) ==========
+    // 创建 Session
+    void createSession(tars::Int64 playerId, tars::Int64 sessionKey);
+
+    // 更新心跳
+    void updateHeartbeat(tars::Int64 playerId);
+
+    // 验证 Session
+    bool validateSession(tars::Int64 playerId, tars::Int64 sessionKey);
+
+    // 获取 Session
+    PlayerSession* getSession(tars::Int64 playerId);
+
+    // 更新场景ID
+    void updateSceneId(tars::Int64 playerId, tars::Int32 sceneId);
+
+    // 标记玩家离线
+    void setPlayerOffline(tars::Int64 playerId);
+
+    // 标记玩家在线（重连恢复）
+    void setPlayerOnline(tars::Int64 playerId);
+
+    // 玩家主动离开（彻底清理）
+    void playerLeave(tars::Int64 playerId);
+
+    // 获取所有在线玩家ID
+    vector<tars::Int64> getOnlinePlayers();
+
+    // ========== 心跳超时检测 (V0.4) ==========
+    // 心跳超时检测（供 HeartbeatThread 调用）
+    void checkHeartbeatTimeout();
+
+    // 获取 Session 的场景ID（用于心跳超时时通知 SceneServer）
+    tars::Int32 getSessionSceneId(tars::Int64 playerId);
+
 private:
-    std::map<tars::Int64, tars::Int64> _connToPlayer;
-    std::map<tars::Int64, tars::Int64> _playerToConn;
+    // V0.4: SceneServer 代理（用于通知玩家掉线/重连）
+    SceneServantPrx _scenePrx;
+    // ========== 定时任务 (V0.4) ==========
+    // 心跳超时检测线程 - 使用独立的 HeartbeatThread 类
+    HeartbeatThread _heartbeatThread;
     
+    // ========== 数据存储 ==========
     // 推送数据: 只持有 playerId -> Current 映射，不持有场景状态
     // V0.3: 使用 unordered_map (O(1)) 替代 map (O(log n))
     std::unordered_map<tars::Int64, tars::TarsCurrentPtr> _playerCurrents;
     
     // V0.3: pthread 读写锁 - 读操作可并行，写操作独占
     mutable pthread_rwlock_t _playerCurrentsRwlock;
-    
-    std::mutex _connMutex;
+
+    // V0.4: Session 管理
+    // playerId -> PlayerSession 映射
+    std::unordered_map<tars::Int64, PlayerSession> _sessions;
+    mutable pthread_rwlock_t _sessionsRwlock;
 };
 
 extern LobbyServerApp g_app;

@@ -132,7 +132,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "b096a726dc7a4fe0e07c3ce0e7e9bf55";
+            return "ad448f239fd43cc216bdfd31856ca522";
         }
         LoginRsp()
         {
@@ -145,6 +145,7 @@ namespace GameDemo
             accountId = 0;
             playerId = 0;
             qqNumber = "";
+            sessionKey = 0;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
@@ -166,6 +167,10 @@ namespace GameDemo
             {
                 _os.write(qqNumber, 4);
             }
+            if (sessionKey != 0)
+            {
+                _os.write(sessionKey, 5);
+            }
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
@@ -176,6 +181,7 @@ namespace GameDemo
             _is.read(accountId, 2, false);
             _is.read(playerId, 3, false);
             _is.read(qqNumber, 4, false);
+            _is.read(sessionKey, 5, false);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
@@ -185,6 +191,7 @@ namespace GameDemo
             p->value["accountId"] = tars::JsonOutput::writeJson(accountId);
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
             p->value["qqNumber"] = tars::JsonOutput::writeJson(qqNumber);
+            p->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
             return p;
         }
         string writeToJsonString() const
@@ -206,6 +213,7 @@ namespace GameDemo
             tars::JsonInput::readJson(accountId,pObj->value["accountId"], false);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], false);
             tars::JsonInput::readJson(qqNumber,pObj->value["qqNumber"], false);
+            tars::JsonInput::readJson(sessionKey,pObj->value["sessionKey"], false);
         }
         void readFromJsonString(const string & str)
         {
@@ -219,6 +227,7 @@ namespace GameDemo
             _ds.display(accountId,"accountId");
             _ds.display(playerId,"playerId");
             _ds.display(qqNumber,"qqNumber");
+            _ds.display(sessionKey,"sessionKey");
             return _os;
         }
         ostream& displaySimple(ostream& _os, int _level=0) const
@@ -228,7 +237,8 @@ namespace GameDemo
             _ds.displaySimple(msg, true);
             _ds.displaySimple(accountId, true);
             _ds.displaySimple(playerId, true);
-            _ds.displaySimple(qqNumber, false);
+            _ds.displaySimple(qqNumber, true);
+            _ds.displaySimple(sessionKey, false);
             return _os;
         }
     public:
@@ -237,10 +247,11 @@ namespace GameDemo
         tars::Int64 accountId;
         tars::Int64 playerId;
         std::string qqNumber;
+        tars::Int64 sessionKey;
     };
     inline bool operator==(const LoginRsp&l, const LoginRsp&r)
     {
-        return l.ret == r.ret && l.msg == r.msg && l.accountId == r.accountId && l.playerId == r.playerId && l.qqNumber == r.qqNumber;
+        return l.ret == r.ret && l.msg == r.msg && l.accountId == r.accountId && l.playerId == r.playerId && l.qqNumber == r.qqNumber && l.sessionKey == r.sessionKey;
     }
     inline bool operator!=(const LoginRsp&l, const LoginRsp&r)
     {

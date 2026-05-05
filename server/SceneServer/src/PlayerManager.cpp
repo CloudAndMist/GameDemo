@@ -51,6 +51,7 @@ void PlayerManager::playerEnter(int64_t playerId, float x, float y, float z,
     data.x = x;
     data.y = y;
     data.z = z;
+    data.isOnline = true;  // 默认在线
     _players[playerId] = data;
 
     // 加入 AOI 格子
@@ -116,6 +117,37 @@ void PlayerManager::playerLeave(int64_t playerId)
     _players.erase(playerId);
 
     pthread_rwlock_unlock(&_rwlock);
+}
+
+void PlayerManager::setOnline(int64_t playerId, bool online)
+{
+    pthread_rwlock_wrlock(&_rwlock);
+
+    auto it = _players.find(playerId);
+    if (it != _players.end())
+    {
+        it->second.isOnline = online;
+        TLOG_INFO("PlayerManager::setOnline playerId=" << playerId << ", isOnline=" << online << endl);
+    }
+    else
+    {
+        TLOG_WARN("PlayerManager::setOnline playerId=" << playerId << " not found" << endl);
+    }
+
+    pthread_rwlock_unlock(&_rwlock);
+}
+
+PlayerInfo PlayerManager::toPlayerInfo(const GlobalPlayerData& data)
+{
+    PlayerInfo info;
+    info.playerId = data.playerId;
+    info.sceneId = data.sceneId;
+    info.level = data.level;
+    info.x = data.x;
+    info.y = data.y;
+    info.z = data.z;
+    info.isOnline = data.isOnline;
+    return info;
 }
 
 vector<int64_t> PlayerManager::getViewPlayers(int64_t playerId)

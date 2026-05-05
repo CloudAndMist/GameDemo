@@ -1,14 +1,12 @@
 /**
- * TestGameClientV0.2 - V0.2 模块测试客户端
+ * TestGameClientV0.4 - V0.4 心跳与断线重连测试客户端
  * 
- * 支持测试功能：
- * 1. 账号注册/登录
- * 2. 角色创建/列表/选择
- * 3. 进入场景/移动/离开场景
- * 4. 心跳机制
+ * V0.4 新增功能：
+ * 1. 登录后自动开启心跳（除非手动 stopHb 停止）
+ * 2. 收到玩家掉线/重连推送通知
  * 
  * 编译: 在 tars-cpp-compiler 容器中
- *   cd /workspace/client/TestGameClientV0.2
+ *   cd /workspace/client/TestGameClientV0.4
  *   mkdir -p build && cd build
  *   cmake .. && make
  */
@@ -59,7 +57,7 @@ public:
     {
         cout << COLOR_CYAN << "[PUSH] " << COLOR_RESET;
         cout << "玩家进入: " << notify.player.roleName;
-        cout << " (ID=" << notify.player.playerId << ")";
+        cout << " (playerId=" << notify.player.playerId << ")";
         cout << " 位置: (" << notify.player.x << ", " << notify.player.y << ", " << notify.player.z << ")" << endl;
     }
 
@@ -76,6 +74,21 @@ public:
     {
         cout << COLOR_YELLOW << "[PUSH] " << COLOR_RESET;
         cout << "玩家离开: playerId=" << notify.playerId << endl;
+    }
+
+    // V0.4: 玩家掉线推送
+    virtual void callback_onPlayerOffline(tars::Int32 ret, const GameDemo::PlayerOfflineNotify& notify)
+    {
+        cout << COLOR_YELLOW << "[PUSH] " << COLOR_RESET;
+        cout << "玩家掉线: playerId=" << notify.playerId << endl;
+    }
+
+    // V0.4: 玩家重连推送 (与 onPlayerOffline 区分)
+    virtual void callback_onPlayerOnline(tars::Int32 ret, const GameDemo::PlayerEnterNotify& notify)
+    {
+        cout << COLOR_GREEN << "[PUSH] " << COLOR_RESET;
+        cout << "玩家重连上线: " << notify.player.roleName;
+        cout << " (playerId=" << notify.player.playerId << ")" << endl;
     }
 };
 
@@ -94,18 +107,20 @@ string getErrorMsg(int ret) {
     }
 }
 
-class TestGameClientV0_2 {
+class TestGameClientV0_4 {
 public:
-    TestGameClientV0_2()
+    TestGameClientV0_4()
         : _comm(new tars::Communicator())
         , _pushCallback(nullptr)
         , _accountId(0)
         , _playerId(0)
+        , _sessionKey(0)  // V0.4: 会话密钥
         , _sceneId(0)
         , _isLogin(false)
         , _inScene(false)
         , _running(true)
         , _heartbeatThread(nullptr)
+        , _autoHeartbeat(false)  // V0.4: 标记是否为自动心跳
         , _curX(0.0f)
         , _curY(0.0f)
     {
@@ -133,7 +148,7 @@ public:
         }
     }
     
-    ~TestGameClientV0_2() {
+    ~TestGameClientV0_4() {
         cleanup();
     }
     
@@ -187,12 +202,16 @@ public:
             
             if (ret == 0) {
                 _accountId = rsp.accountId;
-                _playerId = rsp.playerId;  // 注意：login返回的playerId可能为0
+                _playerId = rsp.playerId;
+                _sessionKey = rsp.sessionKey;  // V0.4: 保存 sessionKey
                 _isLogin = true;
                 LOG_OK("登录成功!");
-                // 注意：registerPush 应在 selectRole 之后调用
                 cout << "  accountId: " << _accountId << endl;
-                cout << "  playerId: " << _playerId << " (请在 selectRole 后使用 registerpush 命令)" << endl;
+                cout << "  playerId: " << _playerId << endl;
+                cout << "  sessionKey: " << _sessionKey << endl;
+                // V0.4: 登录后自动启动心跳
+                startHeartbeat(3);  // 3秒间隔
+                _autoHeartbeat = true;
                 return true;
             } else {
                 LOG_ERR("登录失败: ret=" << ret << " (" << getErrorMsg(ret) << ")");
@@ -212,6 +231,7 @@ public:
         _inScene = false;
         _accountId = 0;
         _playerId = 0;
+        _sessionKey = 0;  // V0.4: 清除 sessionKey
         _sceneId = 0;
         _curX = 0.0f;
         _curY = 0.0f;
@@ -347,6 +367,7 @@ public:
                         LOG_WARN("推送回调注册失败: " << e.what());
                     }
                 }
+
                 return true;
             } else {
                 LOG_ERR("选择失败: ret=" << ret << " (" << getErrorMsg(ret) << ")");
@@ -477,7 +498,7 @@ public:
             LOG_WARN("心跳已在运行!");
             return;
         }
-        
+        cout << "启动心跳... (间隔 " << intervalSeconds << " 秒)" << endl;
         LOG_INFO("启动心跳... (间隔 " << intervalSeconds << " 秒)");
         _heartbeatThread = new thread([this, intervalSeconds]() {
             while (_running) {
@@ -490,6 +511,7 @@ public:
     
     void stopHeartbeat() {
         if (_heartbeatThread) {
+            cout << "停止心跳..." << endl;
             LOG_INFO("停止心跳...");
             _running = false;
             if (_heartbeatThread->joinable()) {
@@ -498,6 +520,12 @@ public:
             delete _heartbeatThread;
             _heartbeatThread = nullptr;
             _running = true;
+            
+            // V0.4: 如果是自动心跳，提示用户
+            if (_autoHeartbeat) {
+                LOG_WARN("V0.4: 自动心跳已停止，如需重启请使用 'starthb'");
+                _autoHeartbeat = false;
+            }
         }
     }
     
@@ -509,15 +537,14 @@ public:
         try {
             HeartBeatReq req;
             req.playerId = _playerId;
+            req.sessionKey = _sessionKey;  // V0.4: 带上 sessionKey
             tars::Int32 ret = _lobbyPrx->heartbeat(req);
             
             if (ret == 0) {
-                cout << COLOR_CYAN << "[HEARTBEAT] " << COLOR_RESET;
-                cout << "playerId=" << _playerId << " OK" << endl;
                 return true;
             } else {
                 cout << COLOR_YELLOW << "[HEARTBEAT] " << COLOR_RESET;
-                cout << "playerId=" << _playerId << " FAILED, ret=" << ret << endl;
+                cout << "playerId=" << _playerId << ", sessionKey=" << _sessionKey << " FAILED, ret=" << ret << endl;
                 return false;
             }
         } catch (const std::exception& e) {
@@ -541,7 +568,11 @@ public:
             if (_inScene) {
                 cout << "  场景ID: " << _sceneId << endl;
             }
-            cout << "  心跳状态: " << (_heartbeatThread ? "运行中" : "未启动") << endl;
+            cout << "  心跳状态: " << (_heartbeatThread ? "运行中" : "未启动");
+            if (_autoHeartbeat && _heartbeatThread) {
+                cout << " (自动)";
+            }
+            cout << endl;
         }
         cout << string(40, '=') << endl;
     }
@@ -551,7 +582,7 @@ public:
     void printHelp() {
         cout << "\n" << COLOR_BOLD;
         cout << "============================================================" << endl;
-        cout << "           TestGameClientV0.2 - V0.2 模块测试客户端        " << endl;
+        cout << "        TestGameClientV0.4 - V0.4 心跳与断线重连客户端      " << endl;
         cout << "============================================================" << endl;
         cout << "  [账号模块]                                                  " << endl;
         cout << "    1. register <qq> <pwd>  - 注册账号                       " << endl;
@@ -560,27 +591,31 @@ public:
         cout << "    4. logout                - 登出                         " << endl;
         cout << "                                                              " << endl;
         cout << "  [角色模块]                                                  " << endl;
-        cout << "    4. rolelist             - 获取角色列表                   " << endl;
-        cout << "    5. createrole <name> <job> - 创建角色 (1战士/2法师/3猎人) " << endl;
-        cout << "    6. selectrole <roleId>  - 选择角色                       " << endl;
+        cout << "    5. rolelist             - 获取角色列表                   " << endl;
+        cout << "    6. createrole <name> <job> - 创建角色 (1战士/2法师/3猎人) " << endl;
+        cout << "    7. selectrole <roleId>  - 选择角色 (自动启动心跳)        " << endl;
         cout << "                                                              " << endl;
         cout << "  [场景模块]                                                  " << endl;
-        cout << "    7. enter [sceneId]      - 进入场景 (默认sceneId=1)        " << endl;
-        cout << "    8. move <x> <y> <z>    - 移动                          " << endl;
-        cout << "    9. randommove           - 随机移动 (后台)                " << endl;
-        cout << "   10. leavescene           - 离开场景                     " << endl;
+        cout << "    8. enter [sceneId]      - 进入场景 (默认sceneId=1)        " << endl;
+        cout << "    9. move <x> <y> <z>    - 移动                          " << endl;
+        cout << "   10. randommove           - 随机移动 (后台)                " << endl;
+        cout << "   11. leavescene           - 离开场景                     " << endl;
         cout << "                                                              " << endl;
-        cout << "  [心跳模块]                                                  " << endl;
-        cout << "   11. heartbeat            - 发送一次心跳                   " << endl;
-        cout << "   12. starthb [sec]       - 启动心跳 (默认10秒间隔)       " << endl;
-        cout << "   13. stophb               - 停止心跳                      " << endl;
+        cout << "  [心跳模块 - V0.4]                                        " << endl;
+        cout << "   12. heartbeat            - 发送一次心跳                   " << endl;
+        cout << "   13. starthb [sec]       - 手动启动心跳 (默认3秒)        " << endl;
+        cout << "   14. stophb               - 停止心跳 (V0.4自动心跳也适用) " << endl;
         cout << "                                                              " << endl;
         cout << "  [系统]                                                      " << endl;
-        cout << "   14. status               - 查看当前状态                   " << endl;
-        cout << "   15. help                 - 显示帮助                      " << endl;
-        cout << "   16. quit                 - 退出程序                      " << endl;
+        cout << "   15. status               - 查看当前状态                   " << endl;
+        cout << "   16. help                 - 显示帮助                      " << endl;
+        cout << "   17. quit                 - 退出程序                      " << endl;
         cout << "============================================================" << endl;
         cout << COLOR_RESET << endl;
+        cout << "  V0.4 新特性:                                               " << endl;
+        cout << "    - selectrole 后自动启动心跳                             " << endl;
+        cout << "    - 收到玩家掉线/重连推送通知                             " << endl;
+        cout << "============================================================" << endl;
     }
     
     // ==================== 主循环 ====================
@@ -588,13 +623,14 @@ public:
     void run() {
         cout << COLOR_BOLD;
         cout << "\n============================================================" << endl;
-        cout << "           TestGameClientV0.2 - V0.2 模块测试客户端        " << endl;
+        cout << "        TestGameClientV0.4 - V0.4 心跳与断线重连客户端      " << endl;
         cout << "                                                              " << endl;
-        cout << "  V0.2 测试范围:                                              " << endl;
+        cout << "  V0.4 测试范围:                                              " << endl;
         cout << "    - 账号注册/登录                                           " << endl;
         cout << "    - 角色创建/列表/选择                                       " << endl;
         cout << "    - 进入场景/移动/离开场景                                   " << endl;
-        cout << "    - 心跳机制                                                " << endl;
+        cout << "    - V0.4 心跳机制 (自动启动)                                 " << endl;
+        cout << "    - V0.4 断线重连推送通知                                    " << endl;
         cout << "============================================================" << endl;
         cout << COLOR_RESET << endl;
         
@@ -755,9 +791,10 @@ public:
             }
             
             else if (op == "starthb" || op == "startheartbeat") {
-                int interval = 10;
+                int interval = 3;
                 iss >> interval;
                 startHeartbeat(interval);
+                _autoHeartbeat = false;  // 手动启动，取消自动标记
             }
             
             else if (op == "stophb" || op == "stopheartbeat") {
@@ -779,11 +816,13 @@ private:
     
     long _accountId;
     long _playerId;
+    long _sessionKey;  // V0.4: 会话密钥
     int _sceneId;
     bool _isLogin;
     bool _inScene;
     atomic<bool> _running;
     thread* _heartbeatThread;
+    bool _autoHeartbeat;  // V0.4: 标记是否为自动心跳
     float _curX;  // 当前 X 坐标 (0-999)
     float _curY;  // 当前 Y 坐标 (0-999)
 };
@@ -792,13 +831,13 @@ int main(int argc, char* argv[])
 {
     cout << COLOR_BOLD;
     cout << "\n============================================================" << endl;
-    cout << "                  TestGameClientV0.2                       " << endl;
-    cout << "                  V0.2 模块测试客户端                       " << endl;
+    cout << "                 TestGameClientV0.4                          " << endl;
+    cout << "            V0.4 心跳与断线重连测试客户端                    " << endl;
     cout << "============================================================" << endl;
     cout << COLOR_RESET << endl;
     
     try {
-        TestGameClientV0_2 client;
+        TestGameClientV0_4 client;
         client.run();
     } catch (const std::exception& e) {
         cerr << "Fatal exception: " << e.what() << endl;

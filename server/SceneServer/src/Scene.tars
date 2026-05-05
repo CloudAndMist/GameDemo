@@ -19,5 +19,11 @@ module GameDemo
 
         // 离开场景 (LobbyServer 调用)
         int leaveScene(LeaveSceneReq req, out LeaveSceneRsp rsp);
+
+        // 玩家掉线 (LobbyServer 调用): 标记离线，但保留玩家数据以便重连恢复
+        int playerOffline(long playerId, int sceneId);
+
+        // 玩家重连 (LobbyServer 调用): 恢复在线状态
+        int playerOnline(long playerId, int sceneId);
     };
 };

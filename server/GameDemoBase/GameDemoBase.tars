@@ -51,6 +51,7 @@ module GameDemo
         5 require float y;
         6 require float z;
         7 require int sceneId;
+        8 require bool isOnline;     // 是否在线（用于断线重连状态显示）
     };
 
     // ========== 场景信息 ==========
@@ -110,6 +111,7 @@ module GameDemo
     struct HeartBeatReq
     {
         0 require long playerId;
+        1 require long sessionKey;      // V0.4: 会话密钥，防止伪造心跳
     };
 
     // ========== 进入场景 ==========

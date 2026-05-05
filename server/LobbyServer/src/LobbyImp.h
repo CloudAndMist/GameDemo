@@ -17,12 +17,6 @@ public:
 
     virtual void destroy(){};
 
-    // 处理客户端连接
-    virtual tars::Int32 onConnect(tars::Int64 connId, tars::TarsCurrentPtr _current_);
-
-    // 处理客户端断开
-    virtual tars::Int32 onClose(tars::Int64 connId, tars::TarsCurrentPtr _current_);
-
     // 登录
     virtual tars::Int32 login(const GameDemo::LoginReq& req, GameDemo::LoginRsp& rsp, tars::TarsCurrentPtr _current_);
 
@@ -80,6 +74,14 @@ public:
     // 玩家离开场景通知
     // notifyList: Scene 内其他玩家的 playerId，由 SceneServer 计算并传入
     virtual tars::Int32 onPlayerLeave(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
+
+    // V0.4: 玩家掉线通知
+    // notifyList: Scene 内其他玩家的 playerId，用于通知周围玩家
+    virtual tars::Int32 onPlayerOffline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
+
+    // V0.4: 玩家重连通知
+    // notifyList: Scene 内其他玩家的 playerId，用于通知周围玩家
+    virtual tars::Int32 onPlayerOnline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, const GameDemo::PlayerInfo& player, tars::TarsCurrentPtr _current_);
 };
 
 #endif

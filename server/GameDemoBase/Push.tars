@@ -14,6 +14,14 @@
 
 module GameDemo
 {
+    // ========== 玩家掉线通知 ==========
+    // 注意: 玩家重连使用独立的 onPlayerOnline 回调，无需 isOffline 标记
+    struct PlayerOfflineNotify
+    {
+        0 require long playerId;
+        1 require long timestamp;
+    };
+
     // ========== Scene2LobbyPush 接口 (SceneServer → LobbyServer) ==========
     // SceneServer 主动通知 LobbyServer 的接口
     // LobbyServer 实现此接口，SceneServer 通过 RPC 调用
@@ -37,6 +45,16 @@ module GameDemo
         // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
         // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
         int onPlayerLeave(vector<long> notifyList, long playerId, int sceneId);
+
+        // 玩家掉线通知
+        // SceneServer 调用此接口通知 LobbyServer 有玩家掉线
+        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
+        int onPlayerOffline(vector<long> notifyList, long playerId, int sceneId);
+
+        // 玩家重连通知
+        // SceneServer 调用此接口通知 LobbyServer 有玩家重连
+        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
+        int onPlayerOnline(vector<long> notifyList, long playerId, int sceneId, PlayerInfo player);
     };
 
     // ========== Lobby2ClientPush 接口 (客户端实现，通过 PushCallback 机制被调用) ==========
@@ -56,5 +74,11 @@ module GameDemo
 
         // 推送玩家离开
         int onPlayerLeave(out PlayerLeaveNotify notify);
+
+        // 推送玩家掉线
+        int onPlayerOffline(out PlayerOfflineNotify notify);
+
+        // 推送玩家重连上线
+        int onPlayerOnline(out PlayerEnterNotify notify);
     };
 };

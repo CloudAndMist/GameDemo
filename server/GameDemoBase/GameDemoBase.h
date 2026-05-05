@@ -345,7 +345,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "b8c87114a8776ca3e9b5f58b2648a738";
+            return "6d5c35db32c5c832dcf2a6688196acb1";
         }
         PlayerInfo()
         {
@@ -361,6 +361,7 @@ namespace GameDemo
             y = 0;
             z = 0;
             sceneId = 0;
+            isOnline = true;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
@@ -373,6 +374,7 @@ namespace GameDemo
             _os.write(y, 5);
             _os.write(z, 6);
             _os.write(sceneId, 7);
+            _os.write(isOnline, 8);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
@@ -386,6 +388,7 @@ namespace GameDemo
             _is.read(y, 5, true);
             _is.read(z, 6, true);
             _is.read(sceneId, 7, true);
+            _is.read(isOnline, 8, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
@@ -398,6 +401,7 @@ namespace GameDemo
             p->value["y"] = tars::JsonOutput::writeJson(y);
             p->value["z"] = tars::JsonOutput::writeJson(z);
             p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
+            p->value["isOnline"] = tars::JsonOutput::writeJson(isOnline);
             return p;
         }
         string writeToJsonString() const
@@ -422,6 +426,7 @@ namespace GameDemo
             tars::JsonInput::readJson(y,pObj->value["y"], true);
             tars::JsonInput::readJson(z,pObj->value["z"], true);
             tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
+            tars::JsonInput::readJson(isOnline,pObj->value["isOnline"], true);
         }
         void readFromJsonString(const string & str)
         {
@@ -438,6 +443,7 @@ namespace GameDemo
             _ds.display(y,"y");
             _ds.display(z,"z");
             _ds.display(sceneId,"sceneId");
+            _ds.display(isOnline,"isOnline");
             return _os;
         }
         ostream& displaySimple(ostream& _os, int _level=0) const
@@ -450,7 +456,8 @@ namespace GameDemo
             _ds.displaySimple(x, true);
             _ds.displaySimple(y, true);
             _ds.displaySimple(z, true);
-            _ds.displaySimple(sceneId, false);
+            _ds.displaySimple(sceneId, true);
+            _ds.displaySimple(isOnline, false);
             return _os;
         }
     public:
@@ -462,10 +469,11 @@ namespace GameDemo
         tars::Float y;
         tars::Float z;
         tars::Int32 sceneId;
+        tars::Bool isOnline;
     };
     inline bool operator==(const PlayerInfo&l, const PlayerInfo&r)
     {
-        return l.playerId == r.playerId && l.openId == r.openId && l.roleName == r.roleName && l.level == r.level && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z) && l.sceneId == r.sceneId;
+        return l.playerId == r.playerId && l.openId == r.openId && l.roleName == r.roleName && l.level == r.level && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z) && l.sceneId == r.sceneId && l.isOnline == r.isOnline;
     }
     inline bool operator!=(const PlayerInfo&l, const PlayerInfo&r)
     {
@@ -1181,7 +1189,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "282dee69d7580ed43b374bb636595df2";
+            return "fbee022731165ab25225e7be143eeed2";
         }
         HeartBeatReq()
         {
@@ -1190,22 +1198,26 @@ namespace GameDemo
         void resetDefautlt()
         {
             playerId = 0;
+            sessionKey = 0;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(playerId, 0);
+            _os.write(sessionKey, 1);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(playerId, 0, true);
+            _is.read(sessionKey, 1, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
             return p;
         }
         string writeToJsonString() const
@@ -1223,6 +1235,7 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(sessionKey,pObj->value["sessionKey"], true);
         }
         void readFromJsonString(const string & str)
         {
@@ -1232,20 +1245,23 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(playerId,"playerId");
+            _ds.display(sessionKey,"sessionKey");
             return _os;
         }
         ostream& displaySimple(ostream& _os, int _level=0) const
         {
             tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(playerId, false);
+            _ds.displaySimple(playerId, true);
+            _ds.displaySimple(sessionKey, false);
             return _os;
         }
     public:
         tars::Int64 playerId;
+        tars::Int64 sessionKey;
     };
     inline bool operator==(const HeartBeatReq&l, const HeartBeatReq&r)
     {
-        return l.playerId == r.playerId;
+        return l.playerId == r.playerId && l.sessionKey == r.sessionKey;
     }
     inline bool operator!=(const HeartBeatReq&l, const HeartBeatReq&r)
     {
