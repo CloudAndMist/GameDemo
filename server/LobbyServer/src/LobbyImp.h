@@ -8,6 +8,8 @@
 
 class LobbyServerApp;
 
+// ========== LobbyServant 实现 ==========
+
 class LobbyImp : public GameDemo::LobbyServant
 {
 public:
@@ -17,34 +19,28 @@ public:
 
     virtual void destroy(){};
 
-    // 登录
+    // 登录 (V0.4.5: 返回 hasCharacter 和 playerInfo)
     virtual tars::Int32 login(const GameDemo::LoginReq& req, GameDemo::LoginRsp& rsp, tars::TarsCurrentPtr _current_);
 
     // 注册
     virtual tars::Int32 registerAccount(const GameDemo::RegisterReq& req, GameDemo::RegisterRsp& rsp, tars::TarsCurrentPtr _current_);
 
-    // 创建角色
-    virtual tars::Int32 createRole(const GameDemo::CreateRoleReq& req, GameDemo::CreateRoleRsp& rsp, tars::TarsCurrentPtr _current_);
-
-    // 获取角色列表
-    virtual tars::Int32 getRoleList(const GameDemo::GetRoleListReq& req, GameDemo::GetRoleListRsp& rsp, tars::TarsCurrentPtr _current_);
-
-    // 选择角色
-    virtual tars::Int32 selectRole(const GameDemo::SelectRoleReq& req, GameDemo::SelectRoleRsp& rsp, tars::TarsCurrentPtr _current_);
+    // 创建角色 (V0.4.5: 一账户一角色)
+    virtual tars::Int32 createCharacter(const GameDemo::CreateCharacterReq& req, GameDemo::CreateCharacterRsp& rsp, tars::TarsCurrentPtr _current_);
 
     // 心跳
     virtual tars::Int32 heartbeat(const GameDemo::HeartBeatReq& req, tars::TarsCurrentPtr _current_);
 
-    // 进入场景 (转发给 SceneServer)
-    virtual tars::Int32 enterScene(tars::Int64 playerId, tars::Int32 sceneId, GameDemo::EnterSceneRsp& rsp, tars::TarsCurrentPtr _current_);
+    // 进入场景 (V0.4.5: 使用 EnterSceneReq)
+    virtual tars::Int32 enterScene(const GameDemo::EnterSceneReq& req, GameDemo::EnterSceneRsp& rsp, tars::TarsCurrentPtr _current_);
 
-    // 移动 (转发给 SceneServer)
+    // 移动
     virtual tars::Int32 move(const GameDemo::MoveReq& req, GameDemo::MoveRsp& rsp, tars::TarsCurrentPtr _current_);
 
-    // 离开场景 (转发给 SceneServer)
-    virtual tars::Int32 leaveScene(tars::Int64 playerId, tars::Int32 sceneId, GameDemo::LeaveSceneRsp& rsp, tars::TarsCurrentPtr _current_);
+    // 离开场景 (V0.4.5: 使用 LeaveSceneReq)
+    virtual tars::Int32 leaveScene(const GameDemo::LeaveSceneReq& req, GameDemo::LeaveSceneRsp& rsp, tars::TarsCurrentPtr _current_);
 
-    // 注册推送 (客户端主动调用以接收推送)
+    // 注册推送
     virtual tars::Int32 registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _current_);
 
 private:
@@ -52,8 +48,8 @@ private:
     GameDemo::SceneServantPrx _scenePrx;
 };
 
-// Scene2LobbyPush 实现 (供 SceneServer 调用)
-// 根据 V0.2.5: SceneServer 传入 notifyList，LobbyServer 只负责根据列表推送，不持有场景状态
+// ========== Scene2LobbyPush 实现 ==========
+
 class Scene2LobbyPushImp : public GameDemo::Scene2LobbyPush
 {
 public:
@@ -64,24 +60,27 @@ public:
     virtual void destroy(){};
 
     // 玩家进入场景通知
-    // notifyList: Scene 内除新玩家外的所有 playerId，由 SceneServer 计算并传入
-    virtual tars::Int32 onPlayerEnter(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, const GameDemo::PlayerInfo& player, tars::TarsCurrentPtr _current_);
+    virtual tars::Int32 onPlayerEnter(const vector<tars::Int64>& notifyList, tars::Int64 playerId, 
+                                       tars::Int32 sceneId, const GameDemo::PlayerBaseInfo& player, 
+                                       tars::TarsCurrentPtr _current_);
 
     // 玩家移动通知
-    // notifyList: Scene 内其他玩家的 playerId，由 SceneServer 计算并传入
-    virtual tars::Int32 onPlayerMove(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, tars::TarsCurrentPtr _current_);
+    virtual tars::Int32 onPlayerMove(const vector<tars::Int64>& notifyList, tars::Int64 playerId, 
+                                     tars::Int32 sceneId, tars::Float x, tars::Float y, tars::Float z, 
+                                     tars::TarsCurrentPtr _current_);
 
     // 玩家离开场景通知
-    // notifyList: Scene 内其他玩家的 playerId，由 SceneServer 计算并传入
-    virtual tars::Int32 onPlayerLeave(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
+    virtual tars::Int32 onPlayerLeave(const vector<tars::Int64>& notifyList, tars::Int64 playerId, 
+                                       tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
 
-    // V0.4: 玩家掉线通知
-    // notifyList: Scene 内其他玩家的 playerId，用于通知周围玩家
-    virtual tars::Int32 onPlayerOffline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
+    // 玩家掉线通知
+    virtual tars::Int32 onPlayerOffline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, 
+                                        tars::Int32 sceneId, tars::TarsCurrentPtr _current_);
 
-    // V0.4: 玩家重连通知
-    // notifyList: Scene 内其他玩家的 playerId，用于通知周围玩家
-    virtual tars::Int32 onPlayerOnline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, tars::Int32 sceneId, const GameDemo::PlayerInfo& player, tars::TarsCurrentPtr _current_);
+    // 玩家重连通知
+    virtual tars::Int32 onPlayerOnline(const vector<tars::Int64>& notifyList, tars::Int64 playerId, 
+                                       tars::Int32 sceneId, const GameDemo::PlayerBaseInfo& player, 
+                                       tars::TarsCurrentPtr _current_);
 };
 
 #endif

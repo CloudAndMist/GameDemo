@@ -1,6 +1,6 @@
 // ========== DB.tars ==========
-// 数据库服务接口
-// 包含账号和角色的 CRUD 操作
+// V0.4.5 数据库服务接口
+// 一账户一角色：账号和角色数据合并到 accounts 表
 
 #include "GameDemoBase.tars"
 
@@ -9,16 +9,35 @@ module GameDemo
     // Database Servant
     interface DBServant
     {
-        // Account operations
-        int createAccount(string qqNumber, string password, out long accountId);
-        int getAccountByQQ(string qqNumber, out AccountInfo account);
-        int accountExists(string qqNumber, out bool exists);
-
-        // Role operations
-        int createRole(long accountId, string roleName, int job, out RoleInfo role);
-        int getRoleList(long accountId, out vector<RoleInfo> roles);
-        int getRole(long roleId, out RoleInfo role);
-        int updateRole(RoleInfo role);
-        int deleteRole(long roleId);
+        // ========== 账号操作 ==========
+        
+        // 创建账号
+        // 返回 accountId = playerId
+        int createAccount(string username, string password, out long accountId);
+        
+        // 根据用户名获取账号信息
+        int getAccountByName(string username, out AccountInfo account);
+        
+        // 根据 ID 获取账号信息
+        int getAccountById(long accountId, out AccountInfo account);
+        
+        // 检查账号是否存在
+        int accountExists(string username, out bool exists);
+        
+        // 更新账号信息（包含角色数据）
+        int updateAccount(AccountInfo account);
+        
+        // ========== 角色操作（一账户一角色模式）==========
+        
+        // 初始化角色（首次登录创建角色）
+        // 账号已存在，只需填充角色相关字段
+        int initCharacter(long accountId, string playerName, int job, 
+                         out AccountInfo character);
+        
+        // 获取角色信息（通过 accountId/playerId）
+        int getCharacter(long playerId, out AccountInfo character);
+        
+        // 更新角色信息
+        int updateCharacter(AccountInfo character);
     };
 };

@@ -72,9 +72,9 @@ public:
     void setOnline(int64_t playerId, bool online);
 
     /**
-     * 将玩家数据转换为 PlayerInfo（用于通知）
+     * 将玩家数据转换为 PlayerBaseInfo（用于通知）
      */
-    PlayerInfo toPlayerInfo(const GlobalPlayerData& data);
+    PlayerBaseInfo toPlayerBaseInfo(const GlobalPlayerData& data);
 
     // ========== 初始化/清理 ==========
 

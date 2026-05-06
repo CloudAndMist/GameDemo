@@ -58,19 +58,26 @@ tars::Int32 SceneImp::enterScene(const EnterSceneReq &req, EnterSceneRsp &rsp, t
         auto* p = _playerMgr->getPlayer(pid);
         if (p)
         {
-            PlayerInfo info;
+            PlayerBaseInfo info;
             info.playerId = p->playerId;
             info.sceneId = p->sceneId;
             info.level = p->level;
-            info.x = p->x;
-            info.y = p->y;
-            info.z = p->z;
+            info.posX = p->x;
+            info.posY = p->y;
+            info.posZ = p->z;
             rsp.players.push_back(info);
         }
     }
 
-    // 异步通知 LobbyServer 有新玩家进入
-    notifyPlayerEnter(req.playerId, req.sceneId, rsp.self, viewPlayers);
+    // 异步通知 LobbyServer 有新玩家进入（使用 PlayerBaseInfo）
+    PlayerBaseInfo selfInfo;
+    selfInfo.playerId = req.playerId;
+    selfInfo.sceneId = req.sceneId;
+    selfInfo.level = 1;
+    selfInfo.posX = 0.0f;
+    selfInfo.posY = 0.0f;
+    selfInfo.posZ = 0.0f;
+    notifyPlayerEnter(req.playerId, req.sceneId, selfInfo, viewPlayers);
 
     TLOG_DEBUG("SceneImp::enterScene success, playerId=" << req.playerId << ", otherPlayers=" << rsp.players.size() << endl);
     return 0;
@@ -133,7 +140,7 @@ tars::Int32 SceneImp::leaveScene(const LeaveSceneReq &req, LeaveSceneRsp &rsp, t
 // 私有方法：异步通知 LobbyServer
 //////////////////////////////////////////////////
 
-void SceneImp::notifyPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList)
+void SceneImp::notifyPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerBaseInfo& player, const vector<tars::Int64>& notifyList)
 {
     try
     {
@@ -189,7 +196,7 @@ void SceneImp::notifyPlayerOffline(tars::Int64 playerId, tars::Int32 sceneId, co
     }
 }
 
-void SceneImp::notifyPlayerOnline(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList)
+void SceneImp::notifyPlayerOnline(tars::Int64 playerId, tars::Int32 sceneId, const PlayerBaseInfo& player, const vector<tars::Int64>& notifyList)
 {
     try
     {
@@ -259,7 +266,13 @@ tars::Int32 SceneImp::playerOnline(tars::Int64 playerId, tars::Int32 sceneId, ta
     // 通知周围玩家该玩家重连
     vector<tars::Int64> notifyList = _playerMgr->getViewPlayers(playerId);
     if (!notifyList.empty()) {
-        PlayerInfo playerInfo = _playerMgr->toPlayerInfo(*player);
+        PlayerBaseInfo playerInfo;
+        playerInfo.playerId = player->playerId;
+        playerInfo.sceneId = player->sceneId;
+        playerInfo.level = player->level;
+        playerInfo.posX = player->x;
+        playerInfo.posY = player->y;
+        playerInfo.posZ = player->z;
         notifyPlayerOnline(playerId, sceneId, playerInfo, notifyList);
     }
 

@@ -1,6 +1,7 @@
 -- ========== reset_db.sql ==========
--- GameDemo 数据库重置脚本
--- 用于每次测试前初始化数据库
+-- V0.4.5 GameDemo 数据库重置脚本
+-- 一账户一角色设计
+-- 注意: 位置信息由 SceneServer 管理，不存储在 DB
 -- 注意: MySQL 容器名称为 tars-mysql，密码为 123456，使用时连接命令示例:
 --   docker exec -i tars-mysql mysql -u root -p123456 < reset_db.sql
 -- 或在容器内执行:
@@ -17,10 +18,7 @@ USE gamedemo;
 -- 1. 重置玩家在线状态表（先清空，因为依赖其他表）
 TRUNCATE TABLE player_online;
 
--- 2. 重置角色表（先清空，因为依赖账号表）
-TRUNCATE TABLE roles;
-
--- 3. 重置账号表
+-- 2. 重置账号表 (V0.4.5: roles 已合并到 accounts，位置由 SceneServer 管理)
 TRUNCATE TABLE accounts;
 
 -- ============================================
@@ -29,9 +27,8 @@ TRUNCATE TABLE accounts;
 SELECT '=== Accounts ===' as '';
 SELECT * FROM accounts;
 
-SELECT '=== Roles ===' as '';
-SELECT * FROM roles;
+SELECT '=== Player Online ===' as '';
+SELECT * FROM player_online;
 
 SELECT '=== Reset Complete ===' as '';
 SELECT CONCAT('Total accounts: ', COUNT(*)) as summary FROM accounts;
-SELECT CONCAT('Total roles: ', COUNT(*)) as summary FROM roles;

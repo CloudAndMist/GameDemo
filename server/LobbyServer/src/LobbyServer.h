@@ -10,17 +10,18 @@ using namespace tars;
 using namespace GameDemo;
 
 /**
- * Session 数据结构 - V0.4 心跳与断线重连
- * 存储连接状态和场景信息（位置由 SceneServer 维护）
+ * Session 数据结构 - V0.4.5 一账户一角色
+ * playerId = accountId，合二为一
+ * Session 使用 playerId 作为 key
  */
 struct PlayerSession
 {
-    tars::Int64 playerId;          // 玩家ID
-    tars::Int64 sessionKey;        // 会话密钥（基于登录时间戳生成）
+    tars::Int64 playerId;          // 玩家ID = 账号ID
+    tars::Int64 sessionKey;         // 会话密钥
     tars::Int64 lastHeartbeat;     // 最后心跳时间戳
-    bool isOnline;                 // 是否在线（true=在线，false=掉线但Session未清除）
-    tars::Int32 sceneId;           // V0.4: 当前所在场景ID（-1=不在任何场景）
-    tars::Int64 offlineTime;       // 掉线时间戳（用于30s后清除）
+    bool isOnline;                 // 是否在线
+    tars::Int32 sceneId;           // 当前所在场景ID（0=不在任何场景）
+    tars::Int64 offlineTime;        // 掉线时间戳
 };
 
 class LobbyServerApp : public Application

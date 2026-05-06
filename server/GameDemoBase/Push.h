@@ -30,7 +30,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "40ebd518ebc63640e0122c378203ebf9";
+            return "fbee022731165ab25225e7be143eeed2";
         }
         PlayerOfflineNotify()
         {
@@ -39,29 +39,25 @@ namespace GameDemo
         void resetDefautlt()
         {
             playerId = 0;
-            isOffline = true;
             timestamp = 0;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(playerId, 0);
-            _os.write(isOffline, 1);
-            _os.write(timestamp, 2);
+            _os.write(timestamp, 1);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(playerId, 0, true);
-            _is.read(isOffline, 1, true);
-            _is.read(timestamp, 2, true);
+            _is.read(timestamp, 1, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-            p->value["isOffline"] = tars::JsonOutput::writeJson(isOffline);
             p->value["timestamp"] = tars::JsonOutput::writeJson(timestamp);
             return p;
         }
@@ -80,7 +76,6 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
-            tars::JsonInput::readJson(isOffline,pObj->value["isOffline"], true);
             tars::JsonInput::readJson(timestamp,pObj->value["timestamp"], true);
         }
         void readFromJsonString(const string & str)
@@ -91,7 +86,6 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(playerId,"playerId");
-            _ds.display(isOffline,"isOffline");
             _ds.display(timestamp,"timestamp");
             return _os;
         }
@@ -99,18 +93,16 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.displaySimple(playerId, true);
-            _ds.displaySimple(isOffline, true);
             _ds.displaySimple(timestamp, false);
             return _os;
         }
     public:
         tars::Int64 playerId;
-        tars::Bool isOffline;
         tars::Int64 timestamp;
     };
     inline bool operator==(const PlayerOfflineNotify&l, const PlayerOfflineNotify&r)
     {
-        return l.playerId == r.playerId && l.isOffline == r.isOffline && l.timestamp == r.timestamp;
+        return l.playerId == r.playerId && l.timestamp == r.timestamp;
     }
     inline bool operator!=(const PlayerOfflineNotify&l, const PlayerOfflineNotify&r)
     {
@@ -1009,7 +1001,7 @@ namespace GameDemo
     {
     public:
         typedef map<string, string> TARS_CONTEXT;
-        tars::Int32 onPlayerEnter(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        tars::Int32 onPlayerEnter(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo & player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
             _os.write(notifyList, 1);
@@ -1069,7 +1061,7 @@ namespace GameDemo
             return _ret;
         }
 
-        void async_onPlayerEnter(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
+        void async_onPlayerEnter(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo &player,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
             _os.write(notifyList, 1);
@@ -1101,7 +1093,7 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"onPlayerEnter", _os, context, _mStatus, callback);
         }
         
-        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerEnterPtr > promise_async_onPlayerEnter(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context)
+        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerEnterPtr > promise_async_onPlayerEnter(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo &player,const map<string, string>& context)
         {
             tars::Promise< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerEnterPtr > promise;
             Scene2LobbyPushPrxCallbackPromisePtr callback = new Scene2LobbyPushPrxCallbackPromise(promise);
@@ -1117,7 +1109,7 @@ namespace GameDemo
             return promise.getFuture();
         }
 
-        void coro_onPlayerEnter(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
+        void coro_onPlayerEnter(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo &player,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
             _os.write(notifyList, 1);
@@ -1485,7 +1477,7 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"onPlayerOffline", _os, context, _mStatus, callback, true);
         }
 
-        tars::Int32 onPlayerOnline(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        tars::Int32 onPlayerOnline(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo & player,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
             _os.write(notifyList, 1);
@@ -1545,7 +1537,7 @@ namespace GameDemo
             return _ret;
         }
 
-        void async_onPlayerOnline(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
+        void async_onPlayerOnline(Scene2LobbyPushPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo &player,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
             _os.write(notifyList, 1);
@@ -1577,7 +1569,7 @@ namespace GameDemo
             tars_invoke_async(tars::TARSNORMAL,"onPlayerOnline", _os, context, _mStatus, callback);
         }
         
-        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerOnlinePtr > promise_async_onPlayerOnline(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context)
+        tars::Future< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerOnlinePtr > promise_async_onPlayerOnline(const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo &player,const map<string, string>& context)
         {
             tars::Promise< Scene2LobbyPushPrxCallbackPromise::PromiseonPlayerOnlinePtr > promise;
             Scene2LobbyPushPrxCallbackPromisePtr callback = new Scene2LobbyPushPrxCallbackPromise(promise);
@@ -1593,7 +1585,7 @@ namespace GameDemo
             return promise.getFuture();
         }
 
-        void coro_onPlayerOnline(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo &player,const map<string, string>& context = TARS_CONTEXT())
+        void coro_onPlayerOnline(Scene2LobbyPushCoroPrxCallbackPtr callback,const vector<tars::Int64> &notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo &player,const map<string, string>& context = TARS_CONTEXT())
         {
             tars::TarsOutputStream<tars::BufferWriterVector> _os;
             _os.write(notifyList, 1);
@@ -1633,7 +1625,7 @@ namespace GameDemo
     {
     public:
         virtual ~Scene2LobbyPush(){}
-        virtual tars::Int32 onPlayerEnter(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,tars::TarsCurrentPtr _current_) = 0;
+        virtual tars::Int32 onPlayerEnter(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo & player,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_onPlayerEnter(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
         {
             size_t _rsp_len_ = 0;
@@ -1877,7 +1869,7 @@ namespace GameDemo
             }
         }
 
-        virtual tars::Int32 onPlayerOnline(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerInfo & player,tars::TarsCurrentPtr _current_) = 0;
+        virtual tars::Int32 onPlayerOnline(const vector<tars::Int64> & notifyList,tars::Int64 playerId,tars::Int32 sceneId,const GameDemo::PlayerBaseInfo & player,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_onPlayerOnline(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
         {
             size_t _rsp_len_ = 0;
@@ -1961,7 +1953,7 @@ namespace GameDemo
                     vector<tars::Int64> notifyList;
                     tars::Int64 playerId;
                     tars::Int32 sceneId;
-                    GameDemo::PlayerInfo player;
+                    GameDemo::PlayerBaseInfo player;
                     if (_current->getRequestVersion() == TUPVERSION)
                     {
                         UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
@@ -2373,7 +2365,7 @@ namespace GameDemo
                     vector<tars::Int64> notifyList;
                     tars::Int64 playerId;
                     tars::Int32 sceneId;
-                    GameDemo::PlayerInfo player;
+                    GameDemo::PlayerBaseInfo player;
                     if (_current->getRequestVersion() == TUPVERSION)
                     {
                         UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;

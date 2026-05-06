@@ -4,13 +4,14 @@
 #include "servant/Application.h"
 #include "DB.h"
 #include <string>
+#include <map>
 
 using namespace std;
 using namespace GameDemo;
 
 /**
  * DBImp implements the DBServant interface
- * Handles all database operations for the game
+ * V0.4.5: 一账户一角色，账号和角色数据合并
  */
 class DBImp : public DBServant
 {
@@ -21,17 +22,17 @@ public:
     virtual void initialize() override;
     virtual void destroy() override;
 
-    // Account operations
-    virtual tars::Int32 accountExists(const std::string & qqNumber, tars::Bool & exists, tars::TarsCurrentPtr _current_) override;
-    virtual tars::Int32 createAccount(const std::string & qqNumber, const std::string & password, tars::Int64 & accountId, tars::TarsCurrentPtr _current_) override;
-    virtual tars::Int32 getAccountByQQ(const std::string & qqNumber, AccountInfo & account, tars::TarsCurrentPtr _current_) override;
+    // ========== 账号操作 ==========
+    virtual tars::Int32 accountExists(const std::string & username, tars::Bool & exists, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 createAccount(const std::string & username, const std::string & password, tars::Int64 & accountId, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 getAccountByName(const std::string & username, AccountInfo & account, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 getAccountById(tars::Int64 accountId, AccountInfo & account, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 updateAccount(const AccountInfo & account, tars::TarsCurrentPtr _current_) override;
 
-    // Role operations
-    virtual tars::Int32 createRole(tars::Int64 accountId, const std::string & roleName, tars::Int32 job, RoleInfo & role, tars::TarsCurrentPtr _current_) override;
-    virtual tars::Int32 deleteRole(tars::Int64 roleId, tars::TarsCurrentPtr _current_) override;
-    virtual tars::Int32 getRole(tars::Int64 roleId, RoleInfo & role, tars::TarsCurrentPtr _current_) override;
-    virtual tars::Int32 getRoleList(tars::Int64 accountId, vector<RoleInfo> & roles, tars::TarsCurrentPtr _current_) override;
-    virtual tars::Int32 updateRole(const RoleInfo & role, tars::TarsCurrentPtr _current_) override;
+    // ========== 角色操作（一账户一角色模式）==========
+    virtual tars::Int32 initCharacter(tars::Int64 accountId, const std::string & playerName, tars::Int32 job, AccountInfo & character, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 getCharacter(tars::Int64 playerId, AccountInfo & character, tars::TarsCurrentPtr _current_) override;
+    virtual tars::Int32 updateCharacter(const AccountInfo & character, tars::TarsCurrentPtr _current_) override;
 
 private:
     bool connectDB();

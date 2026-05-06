@@ -1,6 +1,6 @@
 // ========== Push.tars ==========
-// 推送接口定义
-//
+// V0.4.5 推送接口定义
+// 
 // 架构说明:
 // - Scene2LobbyPush: SceneServer → LobbyServer 的推送接口
 // - Lobby2ClientPush: LobbyServer → 客户端 的推送接口（通过 PushCallback 机制）
@@ -15,7 +15,6 @@
 module GameDemo
 {
     // ========== 玩家掉线通知 ==========
-    // 注意: 玩家重连使用独立的 onPlayerOnline 回调，无需 isOffline 标记
     struct PlayerOfflineNotify
     {
         0 require long playerId;
@@ -23,38 +22,29 @@ module GameDemo
     };
 
     // ========== Scene2LobbyPush 接口 (SceneServer → LobbyServer) ==========
-    // SceneServer 主动通知 LobbyServer 的接口
-    // LobbyServer 实现此接口，SceneServer 通过 RPC 调用
+    // V0.4.5: 使用 PlayerBaseInfo 替代 PlayerInfo（减少数据传输）
 
     interface Scene2LobbyPush
     {
         // 玩家进入场景通知
-        // SceneServer 调用此接口通知 LobbyServer 有新玩家进入
-        // notifyList: Scene 内除新玩家外的所有 playerId，用于 LobbyServer 通知其他玩家
-        // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
-        int onPlayerEnter(vector<long> notifyList, long playerId, int sceneId, PlayerInfo player);
+        // notifyList: Scene 内除新玩家外的所有 playerId
+        int onPlayerEnter(vector<long> notifyList, long playerId, int sceneId, PlayerBaseInfo player);
 
         // 玩家移动通知
-        // SceneServer 调用此接口通知 LobbyServer 有玩家移动
-        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
-        // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
+        // notifyList: Scene 内其他玩家的 playerId
         int onPlayerMove(vector<long> notifyList, long playerId, int sceneId, float x, float y, float z);
 
         // 玩家离开场景通知
-        // SceneServer 调用此接口通知 LobbyServer 有玩家离开
-        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
-        // LobbyServer 收到后通过 PushCallback 转发给 notifyList 中的玩家客户端
+        // notifyList: Scene 内其他玩家的 playerId
         int onPlayerLeave(vector<long> notifyList, long playerId, int sceneId);
 
         // 玩家掉线通知
-        // SceneServer 调用此接口通知 LobbyServer 有玩家掉线
-        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
+        // notifyList: Scene 内其他玩家的 playerId
         int onPlayerOffline(vector<long> notifyList, long playerId, int sceneId);
 
         // 玩家重连通知
-        // SceneServer 调用此接口通知 LobbyServer 有玩家重连
-        // notifyList: Scene 内其他玩家的 playerId，用于 LobbyServer 通知其他玩家
-        int onPlayerOnline(vector<long> notifyList, long playerId, int sceneId, PlayerInfo player);
+        // notifyList: Scene 内其他玩家的 playerId
+        int onPlayerOnline(vector<long> notifyList, long playerId, int sceneId, PlayerBaseInfo player);
     };
 
     // ========== Lobby2ClientPush 接口 (客户端实现，通过 PushCallback 机制被调用) ==========
@@ -62,7 +52,7 @@ module GameDemo
     // 使用 TARS PushCallback 机制:
     //   1. 客户端调用 proxy->tars_set_push_callback(callback)
     //   2. LobbyServer 通过 CurrentPtr 推送消息
-    // 注意: 使用 out 参数以便服务端推送数据 (参考 PushCallbackDemo)
+    // 注意: 使用 out 参数以便服务端推送数据
 
     interface Lobby2ClientPush
     {

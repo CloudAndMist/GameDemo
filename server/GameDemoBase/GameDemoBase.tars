@@ -1,4 +1,5 @@
 // ========== GameDemoBase.tars ==========
+// V0.4.5 统一 playerId 体系（一账户一角色）
 // 游戏演示基础协议，所有服务共用
 
 module GameDemo
@@ -8,50 +9,67 @@ module GameDemo
     const int ERR_ACCOUNT_EXISTS = 1001;
     const int ERR_ACCOUNT_NOT_EXISTS = 1002;
     const int ERR_PASSWORD_MISMATCH = 1003;
-    const int ERR_ROLE_EXISTS = 2001;
-    const int ERR_ROLE_NOT_EXISTS = 2002;
     const int ERR_DB_ERROR = 5001;
     const int ERR_SERVER_BUSY = 9999;
+    const int ERR_INVALID_SESSION = 9001;
+    const int ERR_CHARACTER_EXISTS = 9002;
+    const int ERR_CHARACTER_NOT_EXISTS = 9003;
 
-    // ========== 账号信息 ==========
+    // ========== 账号信息（V0.4.5: 合并角色数据） ==========
+    // accountId = playerId，合二为一
+    // 注意：位置信息由 SceneServer 运行时管理，不存储在 DB
     struct AccountInfo
     {
-        0 require long id;
-        1 require string qqNumber;
-        2 require string password;
-        3 require long createTime;
+        // 账号信息
+        0 require long id;                    // = playerId = accountId
+        1 require string username;
+        2 optional string password;
+        
+        // 角色基础数据
+        10 optional string playerName;         // 玩家名称
+        11 optional int job;                   // 职业
+        12 optional int level;                 // 等级
+        13 optional long exp;                 // 经验
+        14 optional int hp;                    // 当前生命
+        15 optional int maxHp;                 // 最大生命
+        16 optional int mp;                    // 当前魔法
+        17 optional int maxMp;                 // 最大魔法
+        
+        // 时间戳
+        30 optional long createTime;           // 账号创建时间
+        31 optional long lastLoginTime;       // 最后登录时间
     };
 
-    // ========== 角色信息 (完整版) ==========
-    struct RoleInfo
-    {
-        0 require long id;
-        1 require long accountId;
-        2 require string roleName;
-        3 require int job;
-        4 require int level;
-        5 require int hp;
-        6 require int mp;
-        7 require long exp;
-        8 require float x;
-        9 require float y;
-        10 require int sceneId;
-        11 require long createTime;
-        12 require long lastLoginTime;
-    };
-
-    // ========== 玩家基础信息 (简化版) ==========
+    // ========== 玩家信息（完整版）==========
+    // 用于登录响应、角色创建响应等
+    // 注意：位置信息由 SceneServer 管理，enterScene 时返回
     struct PlayerInfo
     {
-        0 require long playerId;
-        1 require string openId;
-        2 require string roleName;
-        3 require int level;
-        4 require float x;
-        5 require float y;
-        6 require float z;
-        7 require int sceneId;
-        8 require bool isOnline;     // 是否在线（用于断线重连状态显示）
+        0 require long playerId;              // = accountId
+        1 require string playerName;        // 玩家名称
+        2 require int job;                   // 职业
+        3 require int level;                 // 等级
+        4 require long exp;                  // 经验
+        5 require int hp;                    // 当前生命
+        6 require int maxHp;                 // 最大生命
+        7 require int mp;                   // 当前魔法
+        8 require int maxMp;                 // 最大魔法
+        9 require long createTime;           // 创建时间
+        10 require long lastLoginTime;       // 最后登录时间
+    };
+
+    // ========== 玩家基础信息（简化版）==========
+    // 用于场景内玩家列表推送
+    // 注意：只包含需要广播的字段，位置是运行时数据
+    struct PlayerBaseInfo
+    {
+        0 require long playerId;              // = accountId
+        1 require string playerName;        // 玩家名称
+        2 require int level;                // 等级
+        3 require float posX;               // X坐标（运行时）
+        4 require float posY;               // Y坐标（运行时）
+        5 require float posZ;               // Z坐标（运行时）
+        6 require int sceneId;             // 所在场景（运行时）
     };
 
     // ========== 场景信息 ==========
@@ -76,7 +94,7 @@ module GameDemo
     // ========== 玩家进入通知 ==========
     struct PlayerEnterNotify
     {
-        0 require PlayerInfo player;
+        0 require PlayerBaseInfo player;
         1 require long timestamp;
     };
 
@@ -110,32 +128,34 @@ module GameDemo
     // ========== 心跳 ==========
     struct HeartBeatReq
     {
-        0 require long playerId;
-        1 require long sessionKey;      // V0.4: 会话密钥，防止伪造心跳
+        0 require long playerId;              // = accountId
+        1 require long sessionKey;            // 会话密钥
     };
 
     // ========== 进入场景 ==========
     struct EnterSceneReq
     {
-        0 require long playerId;
-        1 require int sceneId;
+        0 require long playerId;              // = accountId
+        1 require long sessionKey;            // V0.4.5: 会话密钥
+        2 require int sceneId;
     };
 
     struct EnterSceneRsp
     {
         0 require int ret;
         1 optional string msg;
-        2 optional PlayerInfo self;
-        3 optional vector<PlayerInfo> players;
+        2 optional PlayerBaseInfo self;           // V0.4.5: 使用 PlayerBaseInfo
+        3 optional vector<PlayerBaseInfo> players; // V0.4.5: 使用 PlayerBaseInfo
     };
 
     // ========== 移动 ==========
     struct MoveReq
     {
-        0 require long playerId;
-        1 require float x;
-        2 require float y;
-        3 require float z;
+        0 require long playerId;              // = accountId
+        1 require long sessionKey;            // V0.4.5: 会话密钥
+        2 require float x;
+        3 require float y;
+        4 require float z;
     };
 
     struct MoveRsp
@@ -147,8 +167,9 @@ module GameDemo
     // ========== 离开场景 ==========
     struct LeaveSceneReq
     {
-        0 require long playerId;
-        1 require int sceneId;
+        0 require long playerId;              // = accountId
+        1 require long sessionKey;            // V0.4.5: 会话密钥
+        2 require int sceneId;
     };
 
     struct LeaveSceneRsp
@@ -162,6 +183,6 @@ module GameDemo
     {
         0 require int ret;
         1 optional string msg;
-        2 optional vector<PlayerInfo> players;
+        2 optional vector<PlayerBaseInfo> players; // V0.4.5: 使用 PlayerBaseInfo
     };
 };

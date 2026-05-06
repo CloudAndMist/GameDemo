@@ -137,16 +137,15 @@ void PlayerManager::setOnline(int64_t playerId, bool online)
     pthread_rwlock_unlock(&_rwlock);
 }
 
-PlayerInfo PlayerManager::toPlayerInfo(const GlobalPlayerData& data)
+PlayerBaseInfo PlayerManager::toPlayerBaseInfo(const GlobalPlayerData& data)
 {
-    PlayerInfo info;
+    PlayerBaseInfo info;
     info.playerId = data.playerId;
     info.sceneId = data.sceneId;
     info.level = data.level;
-    info.x = data.x;
-    info.y = data.y;
-    info.z = data.z;
-    info.isOnline = data.isOnline;
+    info.posX = data.x;
+    info.posY = data.y;
+    info.posZ = data.z;
     return info;
 }
 

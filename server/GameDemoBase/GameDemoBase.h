@@ -24,13 +24,15 @@ namespace GameDemo
 
     const tars::Int32 ERR_PASSWORD_MISMATCH = 1003;
 
-    const tars::Int32 ERR_ROLE_EXISTS = 2001;
-
-    const tars::Int32 ERR_ROLE_NOT_EXISTS = 2002;
-
     const tars::Int32 ERR_DB_ERROR = 5001;
 
     const tars::Int32 ERR_SERVER_BUSY = 9999;
+
+    const tars::Int32 ERR_INVALID_SESSION = 9001;
+
+    const tars::Int32 ERR_CHARACTER_EXISTS = 9002;
+
+    const tars::Int32 ERR_CHARACTER_NOT_EXISTS = 9003;
 
     struct AccountInfo : public tars::TarsStructBase
     {
@@ -41,7 +43,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "5a67f4fb1c9184a7f3f53202ae723d54";
+            return "fc4eab2b770698c393a0c2eed98d55cb";
         }
         AccountInfo()
         {
@@ -50,132 +52,16 @@ namespace GameDemo
         void resetDefautlt()
         {
             id = 0;
-            qqNumber = "";
+            username = "";
             password = "";
-            createTime = 0;
-        }
-        template<typename WriterT>
-        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
-        {
-            _os.write(id, 0);
-            _os.write(qqNumber, 1);
-            _os.write(password, 2);
-            _os.write(createTime, 3);
-        }
-        template<typename ReaderT>
-        void readFrom(tars::TarsInputStream<ReaderT>& _is)
-        {
-            resetDefautlt();
-            _is.read(id, 0, true);
-            _is.read(qqNumber, 1, true);
-            _is.read(password, 2, true);
-            _is.read(createTime, 3, true);
-        }
-        tars::JsonValueObjPtr writeToJson() const
-        {
-            tars::JsonValueObjPtr p = new tars::JsonValueObj();
-            p->value["id"] = tars::JsonOutput::writeJson(id);
-            p->value["qqNumber"] = tars::JsonOutput::writeJson(qqNumber);
-            p->value["password"] = tars::JsonOutput::writeJson(password);
-            p->value["createTime"] = tars::JsonOutput::writeJson(createTime);
-            return p;
-        }
-        string writeToJsonString() const
-        {
-            return tars::TC_Json::writeValue(writeToJson());
-        }
-        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
-        {
-            resetDefautlt();
-            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
-            {
-                char s[128];
-                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
-                throw tars::TC_Json_Exception(s);
-            }
-            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
-            tars::JsonInput::readJson(id,pObj->value["id"], true);
-            tars::JsonInput::readJson(qqNumber,pObj->value["qqNumber"], true);
-            tars::JsonInput::readJson(password,pObj->value["password"], true);
-            tars::JsonInput::readJson(createTime,pObj->value["createTime"], true);
-        }
-        void readFromJsonString(const string & str)
-        {
-            readFromJson(tars::TC_Json::getValue(str));
-        }
-        ostream& display(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.display(id,"id");
-            _ds.display(qqNumber,"qqNumber");
-            _ds.display(password,"password");
-            _ds.display(createTime,"createTime");
-            return _os;
-        }
-        ostream& displaySimple(ostream& _os, int _level=0) const
-        {
-            tars::TarsDisplayer _ds(_os, _level);
-            _ds.displaySimple(id, true);
-            _ds.displaySimple(qqNumber, true);
-            _ds.displaySimple(password, true);
-            _ds.displaySimple(createTime, false);
-            return _os;
-        }
-    public:
-        tars::Int64 id;
-        std::string qqNumber;
-        std::string password;
-        tars::Int64 createTime;
-    };
-    inline bool operator==(const AccountInfo&l, const AccountInfo&r)
-    {
-        return l.id == r.id && l.qqNumber == r.qqNumber && l.password == r.password && l.createTime == r.createTime;
-    }
-    inline bool operator!=(const AccountInfo&l, const AccountInfo&r)
-    {
-        return !(l == r);
-    }
-    inline ostream& operator<<(ostream & os,const AccountInfo&r)
-    {
-        os << r.writeToJsonString();
-        return os;
-    }
-    inline istream& operator>>(istream& is,AccountInfo&l)
-    {
-        std::istreambuf_iterator<char> eos;
-        std::string s(std::istreambuf_iterator<char>(is), eos);
-        l.readFromJsonString(s);
-        return is;
-    }
-
-    struct RoleInfo : public tars::TarsStructBase
-    {
-    public:
-        static string className()
-        {
-            return "GameDemo.RoleInfo";
-        }
-        static string MD5()
-        {
-            return "1713bb1e5e8960865b513a9a61f97688";
-        }
-        RoleInfo()
-        {
-            resetDefautlt();
-        }
-        void resetDefautlt()
-        {
-            id = 0;
-            accountId = 0;
-            roleName = "";
+            playerName = "";
             job = 0;
             level = 0;
-            hp = 0;
-            mp = 0;
             exp = 0;
-            x = 0;
-            y = 0;
-            sceneId = 0;
+            hp = 0;
+            maxHp = 0;
+            mp = 0;
+            maxMp = 0;
             createTime = 0;
             lastLoginTime = 0;
         }
@@ -183,51 +69,84 @@ namespace GameDemo
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(id, 0);
-            _os.write(accountId, 1);
-            _os.write(roleName, 2);
-            _os.write(job, 3);
-            _os.write(level, 4);
-            _os.write(hp, 5);
-            _os.write(mp, 6);
-            _os.write(exp, 7);
-            _os.write(x, 8);
-            _os.write(y, 9);
-            _os.write(sceneId, 10);
-            _os.write(createTime, 11);
-            _os.write(lastLoginTime, 12);
+            _os.write(username, 1);
+            if (password != "")
+            {
+                _os.write(password, 2);
+            }
+            if (playerName != "")
+            {
+                _os.write(playerName, 10);
+            }
+            if (job != 0)
+            {
+                _os.write(job, 11);
+            }
+            if (level != 0)
+            {
+                _os.write(level, 12);
+            }
+            if (exp != 0)
+            {
+                _os.write(exp, 13);
+            }
+            if (hp != 0)
+            {
+                _os.write(hp, 14);
+            }
+            if (maxHp != 0)
+            {
+                _os.write(maxHp, 15);
+            }
+            if (mp != 0)
+            {
+                _os.write(mp, 16);
+            }
+            if (maxMp != 0)
+            {
+                _os.write(maxMp, 17);
+            }
+            if (createTime != 0)
+            {
+                _os.write(createTime, 30);
+            }
+            if (lastLoginTime != 0)
+            {
+                _os.write(lastLoginTime, 31);
+            }
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(id, 0, true);
-            _is.read(accountId, 1, true);
-            _is.read(roleName, 2, true);
-            _is.read(job, 3, true);
-            _is.read(level, 4, true);
-            _is.read(hp, 5, true);
-            _is.read(mp, 6, true);
-            _is.read(exp, 7, true);
-            _is.read(x, 8, true);
-            _is.read(y, 9, true);
-            _is.read(sceneId, 10, true);
-            _is.read(createTime, 11, true);
-            _is.read(lastLoginTime, 12, true);
+            _is.read(username, 1, true);
+            _is.read(password, 2, false);
+            _is.read(playerName, 10, false);
+            _is.read(job, 11, false);
+            _is.read(level, 12, false);
+            _is.read(exp, 13, false);
+            _is.read(hp, 14, false);
+            _is.read(maxHp, 15, false);
+            _is.read(mp, 16, false);
+            _is.read(maxMp, 17, false);
+            _is.read(createTime, 30, false);
+            _is.read(lastLoginTime, 31, false);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["id"] = tars::JsonOutput::writeJson(id);
-            p->value["accountId"] = tars::JsonOutput::writeJson(accountId);
-            p->value["roleName"] = tars::JsonOutput::writeJson(roleName);
+            p->value["username"] = tars::JsonOutput::writeJson(username);
+            p->value["password"] = tars::JsonOutput::writeJson(password);
+            p->value["playerName"] = tars::JsonOutput::writeJson(playerName);
             p->value["job"] = tars::JsonOutput::writeJson(job);
             p->value["level"] = tars::JsonOutput::writeJson(level);
-            p->value["hp"] = tars::JsonOutput::writeJson(hp);
-            p->value["mp"] = tars::JsonOutput::writeJson(mp);
             p->value["exp"] = tars::JsonOutput::writeJson(exp);
-            p->value["x"] = tars::JsonOutput::writeJson(x);
-            p->value["y"] = tars::JsonOutput::writeJson(y);
-            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
+            p->value["hp"] = tars::JsonOutput::writeJson(hp);
+            p->value["maxHp"] = tars::JsonOutput::writeJson(maxHp);
+            p->value["mp"] = tars::JsonOutput::writeJson(mp);
+            p->value["maxMp"] = tars::JsonOutput::writeJson(maxMp);
             p->value["createTime"] = tars::JsonOutput::writeJson(createTime);
             p->value["lastLoginTime"] = tars::JsonOutput::writeJson(lastLoginTime);
             return p;
@@ -247,18 +166,18 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(id,pObj->value["id"], true);
-            tars::JsonInput::readJson(accountId,pObj->value["accountId"], true);
-            tars::JsonInput::readJson(roleName,pObj->value["roleName"], true);
-            tars::JsonInput::readJson(job,pObj->value["job"], true);
-            tars::JsonInput::readJson(level,pObj->value["level"], true);
-            tars::JsonInput::readJson(hp,pObj->value["hp"], true);
-            tars::JsonInput::readJson(mp,pObj->value["mp"], true);
-            tars::JsonInput::readJson(exp,pObj->value["exp"], true);
-            tars::JsonInput::readJson(x,pObj->value["x"], true);
-            tars::JsonInput::readJson(y,pObj->value["y"], true);
-            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
-            tars::JsonInput::readJson(createTime,pObj->value["createTime"], true);
-            tars::JsonInput::readJson(lastLoginTime,pObj->value["lastLoginTime"], true);
+            tars::JsonInput::readJson(username,pObj->value["username"], true);
+            tars::JsonInput::readJson(password,pObj->value["password"], false);
+            tars::JsonInput::readJson(playerName,pObj->value["playerName"], false);
+            tars::JsonInput::readJson(job,pObj->value["job"], false);
+            tars::JsonInput::readJson(level,pObj->value["level"], false);
+            tars::JsonInput::readJson(exp,pObj->value["exp"], false);
+            tars::JsonInput::readJson(hp,pObj->value["hp"], false);
+            tars::JsonInput::readJson(maxHp,pObj->value["maxHp"], false);
+            tars::JsonInput::readJson(mp,pObj->value["mp"], false);
+            tars::JsonInput::readJson(maxMp,pObj->value["maxMp"], false);
+            tars::JsonInput::readJson(createTime,pObj->value["createTime"], false);
+            tars::JsonInput::readJson(lastLoginTime,pObj->value["lastLoginTime"], false);
         }
         void readFromJsonString(const string & str)
         {
@@ -268,16 +187,16 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(id,"id");
-            _ds.display(accountId,"accountId");
-            _ds.display(roleName,"roleName");
+            _ds.display(username,"username");
+            _ds.display(password,"password");
+            _ds.display(playerName,"playerName");
             _ds.display(job,"job");
             _ds.display(level,"level");
-            _ds.display(hp,"hp");
-            _ds.display(mp,"mp");
             _ds.display(exp,"exp");
-            _ds.display(x,"x");
-            _ds.display(y,"y");
-            _ds.display(sceneId,"sceneId");
+            _ds.display(hp,"hp");
+            _ds.display(maxHp,"maxHp");
+            _ds.display(mp,"mp");
+            _ds.display(maxMp,"maxMp");
             _ds.display(createTime,"createTime");
             _ds.display(lastLoginTime,"lastLoginTime");
             return _os;
@@ -286,49 +205,49 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.displaySimple(id, true);
-            _ds.displaySimple(accountId, true);
-            _ds.displaySimple(roleName, true);
+            _ds.displaySimple(username, true);
+            _ds.displaySimple(password, true);
+            _ds.displaySimple(playerName, true);
             _ds.displaySimple(job, true);
             _ds.displaySimple(level, true);
-            _ds.displaySimple(hp, true);
-            _ds.displaySimple(mp, true);
             _ds.displaySimple(exp, true);
-            _ds.displaySimple(x, true);
-            _ds.displaySimple(y, true);
-            _ds.displaySimple(sceneId, true);
+            _ds.displaySimple(hp, true);
+            _ds.displaySimple(maxHp, true);
+            _ds.displaySimple(mp, true);
+            _ds.displaySimple(maxMp, true);
             _ds.displaySimple(createTime, true);
             _ds.displaySimple(lastLoginTime, false);
             return _os;
         }
     public:
         tars::Int64 id;
-        tars::Int64 accountId;
-        std::string roleName;
+        std::string username;
+        std::string password;
+        std::string playerName;
         tars::Int32 job;
         tars::Int32 level;
-        tars::Int32 hp;
-        tars::Int32 mp;
         tars::Int64 exp;
-        tars::Float x;
-        tars::Float y;
-        tars::Int32 sceneId;
+        tars::Int32 hp;
+        tars::Int32 maxHp;
+        tars::Int32 mp;
+        tars::Int32 maxMp;
         tars::Int64 createTime;
         tars::Int64 lastLoginTime;
     };
-    inline bool operator==(const RoleInfo&l, const RoleInfo&r)
+    inline bool operator==(const AccountInfo&l, const AccountInfo&r)
     {
-        return l.id == r.id && l.accountId == r.accountId && l.roleName == r.roleName && l.job == r.job && l.level == r.level && l.hp == r.hp && l.mp == r.mp && l.exp == r.exp && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && l.sceneId == r.sceneId && l.createTime == r.createTime && l.lastLoginTime == r.lastLoginTime;
+        return l.id == r.id && l.username == r.username && l.password == r.password && l.playerName == r.playerName && l.job == r.job && l.level == r.level && l.exp == r.exp && l.hp == r.hp && l.maxHp == r.maxHp && l.mp == r.mp && l.maxMp == r.maxMp && l.createTime == r.createTime && l.lastLoginTime == r.lastLoginTime;
     }
-    inline bool operator!=(const RoleInfo&l, const RoleInfo&r)
+    inline bool operator!=(const AccountInfo&l, const AccountInfo&r)
     {
         return !(l == r);
     }
-    inline ostream& operator<<(ostream & os,const RoleInfo&r)
+    inline ostream& operator<<(ostream & os,const AccountInfo&r)
     {
         os << r.writeToJsonString();
         return os;
     }
-    inline istream& operator>>(istream& is,RoleInfo&l)
+    inline istream& operator>>(istream& is,AccountInfo&l)
     {
         std::istreambuf_iterator<char> eos;
         std::string s(std::istreambuf_iterator<char>(is), eos);
@@ -345,7 +264,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "6d5c35db32c5c832dcf2a6688196acb1";
+            return "8475e3bf6ad9d89bd6d2ad4725db9ac7";
         }
         PlayerInfo()
         {
@@ -354,54 +273,62 @@ namespace GameDemo
         void resetDefautlt()
         {
             playerId = 0;
-            openId = "";
-            roleName = "";
+            playerName = "";
+            job = 0;
             level = 0;
-            x = 0;
-            y = 0;
-            z = 0;
-            sceneId = 0;
-            isOnline = true;
+            exp = 0;
+            hp = 0;
+            maxHp = 0;
+            mp = 0;
+            maxMp = 0;
+            createTime = 0;
+            lastLoginTime = 0;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(playerId, 0);
-            _os.write(openId, 1);
-            _os.write(roleName, 2);
+            _os.write(playerName, 1);
+            _os.write(job, 2);
             _os.write(level, 3);
-            _os.write(x, 4);
-            _os.write(y, 5);
-            _os.write(z, 6);
-            _os.write(sceneId, 7);
-            _os.write(isOnline, 8);
+            _os.write(exp, 4);
+            _os.write(hp, 5);
+            _os.write(maxHp, 6);
+            _os.write(mp, 7);
+            _os.write(maxMp, 8);
+            _os.write(createTime, 9);
+            _os.write(lastLoginTime, 10);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(playerId, 0, true);
-            _is.read(openId, 1, true);
-            _is.read(roleName, 2, true);
+            _is.read(playerName, 1, true);
+            _is.read(job, 2, true);
             _is.read(level, 3, true);
-            _is.read(x, 4, true);
-            _is.read(y, 5, true);
-            _is.read(z, 6, true);
-            _is.read(sceneId, 7, true);
-            _is.read(isOnline, 8, true);
+            _is.read(exp, 4, true);
+            _is.read(hp, 5, true);
+            _is.read(maxHp, 6, true);
+            _is.read(mp, 7, true);
+            _is.read(maxMp, 8, true);
+            _is.read(createTime, 9, true);
+            _is.read(lastLoginTime, 10, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
-            p->value["openId"] = tars::JsonOutput::writeJson(openId);
-            p->value["roleName"] = tars::JsonOutput::writeJson(roleName);
+            p->value["playerName"] = tars::JsonOutput::writeJson(playerName);
+            p->value["job"] = tars::JsonOutput::writeJson(job);
             p->value["level"] = tars::JsonOutput::writeJson(level);
-            p->value["x"] = tars::JsonOutput::writeJson(x);
-            p->value["y"] = tars::JsonOutput::writeJson(y);
-            p->value["z"] = tars::JsonOutput::writeJson(z);
-            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
-            p->value["isOnline"] = tars::JsonOutput::writeJson(isOnline);
+            p->value["exp"] = tars::JsonOutput::writeJson(exp);
+            p->value["hp"] = tars::JsonOutput::writeJson(hp);
+            p->value["maxHp"] = tars::JsonOutput::writeJson(maxHp);
+            p->value["mp"] = tars::JsonOutput::writeJson(mp);
+            p->value["maxMp"] = tars::JsonOutput::writeJson(maxMp);
+            p->value["createTime"] = tars::JsonOutput::writeJson(createTime);
+            p->value["lastLoginTime"] = tars::JsonOutput::writeJson(lastLoginTime);
             return p;
         }
         string writeToJsonString() const
@@ -419,14 +346,16 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
-            tars::JsonInput::readJson(openId,pObj->value["openId"], true);
-            tars::JsonInput::readJson(roleName,pObj->value["roleName"], true);
+            tars::JsonInput::readJson(playerName,pObj->value["playerName"], true);
+            tars::JsonInput::readJson(job,pObj->value["job"], true);
             tars::JsonInput::readJson(level,pObj->value["level"], true);
-            tars::JsonInput::readJson(x,pObj->value["x"], true);
-            tars::JsonInput::readJson(y,pObj->value["y"], true);
-            tars::JsonInput::readJson(z,pObj->value["z"], true);
-            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
-            tars::JsonInput::readJson(isOnline,pObj->value["isOnline"], true);
+            tars::JsonInput::readJson(exp,pObj->value["exp"], true);
+            tars::JsonInput::readJson(hp,pObj->value["hp"], true);
+            tars::JsonInput::readJson(maxHp,pObj->value["maxHp"], true);
+            tars::JsonInput::readJson(mp,pObj->value["mp"], true);
+            tars::JsonInput::readJson(maxMp,pObj->value["maxMp"], true);
+            tars::JsonInput::readJson(createTime,pObj->value["createTime"], true);
+            tars::JsonInput::readJson(lastLoginTime,pObj->value["lastLoginTime"], true);
         }
         void readFromJsonString(const string & str)
         {
@@ -436,44 +365,50 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(playerId,"playerId");
-            _ds.display(openId,"openId");
-            _ds.display(roleName,"roleName");
+            _ds.display(playerName,"playerName");
+            _ds.display(job,"job");
             _ds.display(level,"level");
-            _ds.display(x,"x");
-            _ds.display(y,"y");
-            _ds.display(z,"z");
-            _ds.display(sceneId,"sceneId");
-            _ds.display(isOnline,"isOnline");
+            _ds.display(exp,"exp");
+            _ds.display(hp,"hp");
+            _ds.display(maxHp,"maxHp");
+            _ds.display(mp,"mp");
+            _ds.display(maxMp,"maxMp");
+            _ds.display(createTime,"createTime");
+            _ds.display(lastLoginTime,"lastLoginTime");
             return _os;
         }
         ostream& displaySimple(ostream& _os, int _level=0) const
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.displaySimple(playerId, true);
-            _ds.displaySimple(openId, true);
-            _ds.displaySimple(roleName, true);
+            _ds.displaySimple(playerName, true);
+            _ds.displaySimple(job, true);
             _ds.displaySimple(level, true);
-            _ds.displaySimple(x, true);
-            _ds.displaySimple(y, true);
-            _ds.displaySimple(z, true);
-            _ds.displaySimple(sceneId, true);
-            _ds.displaySimple(isOnline, false);
+            _ds.displaySimple(exp, true);
+            _ds.displaySimple(hp, true);
+            _ds.displaySimple(maxHp, true);
+            _ds.displaySimple(mp, true);
+            _ds.displaySimple(maxMp, true);
+            _ds.displaySimple(createTime, true);
+            _ds.displaySimple(lastLoginTime, false);
             return _os;
         }
     public:
         tars::Int64 playerId;
-        std::string openId;
-        std::string roleName;
+        std::string playerName;
+        tars::Int32 job;
         tars::Int32 level;
-        tars::Float x;
-        tars::Float y;
-        tars::Float z;
-        tars::Int32 sceneId;
-        tars::Bool isOnline;
+        tars::Int64 exp;
+        tars::Int32 hp;
+        tars::Int32 maxHp;
+        tars::Int32 mp;
+        tars::Int32 maxMp;
+        tars::Int64 createTime;
+        tars::Int64 lastLoginTime;
     };
     inline bool operator==(const PlayerInfo&l, const PlayerInfo&r)
     {
-        return l.playerId == r.playerId && l.openId == r.openId && l.roleName == r.roleName && l.level == r.level && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z) && l.sceneId == r.sceneId && l.isOnline == r.isOnline;
+        return l.playerId == r.playerId && l.playerName == r.playerName && l.job == r.job && l.level == r.level && l.exp == r.exp && l.hp == r.hp && l.maxHp == r.maxHp && l.mp == r.mp && l.maxMp == r.maxMp && l.createTime == r.createTime && l.lastLoginTime == r.lastLoginTime;
     }
     inline bool operator!=(const PlayerInfo&l, const PlayerInfo&r)
     {
@@ -485,6 +420,146 @@ namespace GameDemo
         return os;
     }
     inline istream& operator>>(istream& is,PlayerInfo&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+    struct PlayerBaseInfo : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.PlayerBaseInfo";
+        }
+        static string MD5()
+        {
+            return "f4ad10c8cb83b7cdcd3846935cbb014f";
+        }
+        PlayerBaseInfo()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            playerId = 0;
+            playerName = "";
+            level = 0;
+            posX = 0;
+            posY = 0;
+            posZ = 0;
+            sceneId = 0;
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(playerId, 0);
+            _os.write(playerName, 1);
+            _os.write(level, 2);
+            _os.write(posX, 3);
+            _os.write(posY, 4);
+            _os.write(posZ, 5);
+            _os.write(sceneId, 6);
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(playerId, 0, true);
+            _is.read(playerName, 1, true);
+            _is.read(level, 2, true);
+            _is.read(posX, 3, true);
+            _is.read(posY, 4, true);
+            _is.read(posZ, 5, true);
+            _is.read(sceneId, 6, true);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["playerName"] = tars::JsonOutput::writeJson(playerName);
+            p->value["level"] = tars::JsonOutput::writeJson(level);
+            p->value["posX"] = tars::JsonOutput::writeJson(posX);
+            p->value["posY"] = tars::JsonOutput::writeJson(posY);
+            p->value["posZ"] = tars::JsonOutput::writeJson(posZ);
+            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(playerName,pObj->value["playerName"], true);
+            tars::JsonInput::readJson(level,pObj->value["level"], true);
+            tars::JsonInput::readJson(posX,pObj->value["posX"], true);
+            tars::JsonInput::readJson(posY,pObj->value["posY"], true);
+            tars::JsonInput::readJson(posZ,pObj->value["posZ"], true);
+            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(playerId,"playerId");
+            _ds.display(playerName,"playerName");
+            _ds.display(level,"level");
+            _ds.display(posX,"posX");
+            _ds.display(posY,"posY");
+            _ds.display(posZ,"posZ");
+            _ds.display(sceneId,"sceneId");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(playerId, true);
+            _ds.displaySimple(playerName, true);
+            _ds.displaySimple(level, true);
+            _ds.displaySimple(posX, true);
+            _ds.displaySimple(posY, true);
+            _ds.displaySimple(posZ, true);
+            _ds.displaySimple(sceneId, false);
+            return _os;
+        }
+    public:
+        tars::Int64 playerId;
+        std::string playerName;
+        tars::Int32 level;
+        tars::Float posX;
+        tars::Float posY;
+        tars::Float posZ;
+        tars::Int32 sceneId;
+    };
+    inline bool operator==(const PlayerBaseInfo&l, const PlayerBaseInfo&r)
+    {
+        return l.playerId == r.playerId && l.playerName == r.playerName && l.level == r.level && tars::TC_Common::equal(l.posX,r.posX) && tars::TC_Common::equal(l.posY,r.posY) && tars::TC_Common::equal(l.posZ,r.posZ) && l.sceneId == r.sceneId;
+    }
+    inline bool operator!=(const PlayerBaseInfo&l, const PlayerBaseInfo&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const PlayerBaseInfo&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,PlayerBaseInfo&l)
     {
         std::istreambuf_iterator<char> eos;
         std::string s(std::istreambuf_iterator<char>(is), eos);
@@ -741,7 +816,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "fbe6de8dc110a32ba26fec22b22c9ad0";
+            return "45da917a881acd42d22a7d252f6b16f3";
         }
         PlayerEnterNotify()
         {
@@ -808,7 +883,7 @@ namespace GameDemo
             return _os;
         }
     public:
-        GameDemo::PlayerInfo player;
+        GameDemo::PlayerBaseInfo player;
         tars::Int64 timestamp;
     };
     inline bool operator==(const PlayerEnterNotify&l, const PlayerEnterNotify&r)
@@ -1289,7 +1364,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "7c0dc944c05c2016ec794c2371a4606b";
+            return "c4c3bed5efa333d43586c2aa79cf26b5";
         }
         EnterSceneReq()
         {
@@ -1298,25 +1373,29 @@ namespace GameDemo
         void resetDefautlt()
         {
             playerId = 0;
+            sessionKey = 0;
             sceneId = 0;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(playerId, 0);
-            _os.write(sceneId, 1);
+            _os.write(sessionKey, 1);
+            _os.write(sceneId, 2);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(playerId, 0, true);
-            _is.read(sceneId, 1, true);
+            _is.read(sessionKey, 1, true);
+            _is.read(sceneId, 2, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
             p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
             return p;
         }
@@ -1335,6 +1414,7 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(sessionKey,pObj->value["sessionKey"], true);
             tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
         }
         void readFromJsonString(const string & str)
@@ -1345,6 +1425,7 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(playerId,"playerId");
+            _ds.display(sessionKey,"sessionKey");
             _ds.display(sceneId,"sceneId");
             return _os;
         }
@@ -1352,16 +1433,18 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.displaySimple(playerId, true);
+            _ds.displaySimple(sessionKey, true);
             _ds.displaySimple(sceneId, false);
             return _os;
         }
     public:
         tars::Int64 playerId;
+        tars::Int64 sessionKey;
         tars::Int32 sceneId;
     };
     inline bool operator==(const EnterSceneReq&l, const EnterSceneReq&r)
     {
-        return l.playerId == r.playerId && l.sceneId == r.sceneId;
+        return l.playerId == r.playerId && l.sessionKey == r.sessionKey && l.sceneId == r.sceneId;
     }
     inline bool operator!=(const EnterSceneReq&l, const EnterSceneReq&r)
     {
@@ -1389,7 +1472,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "1c87459b2bb9dae7ee339e7fb6658895";
+            return "b3cab81feac2a02a1d33a8895706f91f";
         }
         EnterSceneRsp()
         {
@@ -1478,8 +1561,8 @@ namespace GameDemo
     public:
         tars::Int32 ret;
         std::string msg;
-        GameDemo::PlayerInfo self;
-        vector<GameDemo::PlayerInfo> players;
+        GameDemo::PlayerBaseInfo self;
+        vector<GameDemo::PlayerBaseInfo> players;
     };
     inline bool operator==(const EnterSceneRsp&l, const EnterSceneRsp&r)
     {
@@ -1511,7 +1594,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "50686460be3b7d11bbc122ceda14e777";
+            return "f50ddc2901b463e4afc1a6d3e50c6ef5";
         }
         MoveReq()
         {
@@ -1520,6 +1603,7 @@ namespace GameDemo
         void resetDefautlt()
         {
             playerId = 0;
+            sessionKey = 0;
             x = 0;
             y = 0;
             z = 0;
@@ -1528,23 +1612,26 @@ namespace GameDemo
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(playerId, 0);
-            _os.write(x, 1);
-            _os.write(y, 2);
-            _os.write(z, 3);
+            _os.write(sessionKey, 1);
+            _os.write(x, 2);
+            _os.write(y, 3);
+            _os.write(z, 4);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(playerId, 0, true);
-            _is.read(x, 1, true);
-            _is.read(y, 2, true);
-            _is.read(z, 3, true);
+            _is.read(sessionKey, 1, true);
+            _is.read(x, 2, true);
+            _is.read(y, 3, true);
+            _is.read(z, 4, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
             p->value["x"] = tars::JsonOutput::writeJson(x);
             p->value["y"] = tars::JsonOutput::writeJson(y);
             p->value["z"] = tars::JsonOutput::writeJson(z);
@@ -1565,6 +1652,7 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(sessionKey,pObj->value["sessionKey"], true);
             tars::JsonInput::readJson(x,pObj->value["x"], true);
             tars::JsonInput::readJson(y,pObj->value["y"], true);
             tars::JsonInput::readJson(z,pObj->value["z"], true);
@@ -1577,6 +1665,7 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(playerId,"playerId");
+            _ds.display(sessionKey,"sessionKey");
             _ds.display(x,"x");
             _ds.display(y,"y");
             _ds.display(z,"z");
@@ -1586,6 +1675,7 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.displaySimple(playerId, true);
+            _ds.displaySimple(sessionKey, true);
             _ds.displaySimple(x, true);
             _ds.displaySimple(y, true);
             _ds.displaySimple(z, false);
@@ -1593,13 +1683,14 @@ namespace GameDemo
         }
     public:
         tars::Int64 playerId;
+        tars::Int64 sessionKey;
         tars::Float x;
         tars::Float y;
         tars::Float z;
     };
     inline bool operator==(const MoveReq&l, const MoveReq&r)
     {
-        return l.playerId == r.playerId && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z);
+        return l.playerId == r.playerId && l.sessionKey == r.sessionKey && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z);
     }
     inline bool operator!=(const MoveReq&l, const MoveReq&r)
     {
@@ -1730,7 +1821,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "7c0dc944c05c2016ec794c2371a4606b";
+            return "c4c3bed5efa333d43586c2aa79cf26b5";
         }
         LeaveSceneReq()
         {
@@ -1739,25 +1830,29 @@ namespace GameDemo
         void resetDefautlt()
         {
             playerId = 0;
+            sessionKey = 0;
             sceneId = 0;
         }
         template<typename WriterT>
         void writeTo(tars::TarsOutputStream<WriterT>& _os) const
         {
             _os.write(playerId, 0);
-            _os.write(sceneId, 1);
+            _os.write(sessionKey, 1);
+            _os.write(sceneId, 2);
         }
         template<typename ReaderT>
         void readFrom(tars::TarsInputStream<ReaderT>& _is)
         {
             resetDefautlt();
             _is.read(playerId, 0, true);
-            _is.read(sceneId, 1, true);
+            _is.read(sessionKey, 1, true);
+            _is.read(sceneId, 2, true);
         }
         tars::JsonValueObjPtr writeToJson() const
         {
             tars::JsonValueObjPtr p = new tars::JsonValueObj();
             p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
             p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
             return p;
         }
@@ -1776,6 +1871,7 @@ namespace GameDemo
             }
             tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
             tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(sessionKey,pObj->value["sessionKey"], true);
             tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
         }
         void readFromJsonString(const string & str)
@@ -1786,6 +1882,7 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.display(playerId,"playerId");
+            _ds.display(sessionKey,"sessionKey");
             _ds.display(sceneId,"sceneId");
             return _os;
         }
@@ -1793,16 +1890,18 @@ namespace GameDemo
         {
             tars::TarsDisplayer _ds(_os, _level);
             _ds.displaySimple(playerId, true);
+            _ds.displaySimple(sessionKey, true);
             _ds.displaySimple(sceneId, false);
             return _os;
         }
     public:
         tars::Int64 playerId;
+        tars::Int64 sessionKey;
         tars::Int32 sceneId;
     };
     inline bool operator==(const LeaveSceneReq&l, const LeaveSceneReq&r)
     {
-        return l.playerId == r.playerId && l.sceneId == r.sceneId;
+        return l.playerId == r.playerId && l.sessionKey == r.sessionKey && l.sceneId == r.sceneId;
     }
     inline bool operator!=(const LeaveSceneReq&l, const LeaveSceneReq&r)
     {
@@ -1933,7 +2032,7 @@ namespace GameDemo
         }
         static string MD5()
         {
-            return "ff9ca8c49b0ca25e502929a831e7065a";
+            return "540f9159456a39c152d95fcd2c690821";
         }
         GetScenePlayersRsp()
         {
@@ -2015,7 +2114,7 @@ namespace GameDemo
     public:
         tars::Int32 ret;
         std::string msg;
-        vector<GameDemo::PlayerInfo> players;
+        vector<GameDemo::PlayerBaseInfo> players;
     };
     inline bool operator==(const GetScenePlayersRsp&l, const GetScenePlayersRsp&r)
     {

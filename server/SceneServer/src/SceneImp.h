@@ -40,7 +40,7 @@ private:
     Scene2LobbyPushPrx _lobbyPushPrx;  // LobbyServer 推送接口代理
 
     // 通知 LobbyServer 有玩家进入（notifyList 由调用方计算并传入）
-    void notifyPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList);
+    void notifyPlayerEnter(tars::Int64 playerId, tars::Int32 sceneId, const PlayerBaseInfo& player, const vector<tars::Int64>& notifyList);
 
     // 通知 LobbyServer 有玩家移动（notifyList 由调用方计算并传入）
     void notifyPlayerMove(tars::Int64 playerId, tars::Int32 sceneId, float x, float y, float z, const vector<tars::Int64>& notifyList);
@@ -52,7 +52,7 @@ private:
     void notifyPlayerOffline(tars::Int64 playerId, tars::Int32 sceneId, const vector<tars::Int64>& notifyList);
 
     // 通知 LobbyServer 有玩家重连（notifyList 由调用方计算并传入）
-    void notifyPlayerOnline(tars::Int64 playerId, tars::Int32 sceneId, const PlayerInfo& player, const vector<tars::Int64>& notifyList);
+    void notifyPlayerOnline(tars::Int64 playerId, tars::Int32 sceneId, const PlayerBaseInfo& player, const vector<tars::Int64>& notifyList);
 };
 
 #endif

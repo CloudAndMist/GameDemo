@@ -1,6 +1,9 @@
 // ========== Lobby.tars ==========
-// LobbyServer 大厅服务接口
-// 整合账号相关功能和客户端连接管理
+// V0.4.5 LobbyServer 大厅服务接口
+// 一账户一角色设计：
+//   - accountId = playerId
+//   - Login 后直接创建 Session
+//   - LoginRsp 返回 hasCharacter 标志
 //
 // 注意: 共用的请求/响应结构已移至 GameDemoBase/GameDemoBase.tars
 
@@ -15,25 +18,25 @@ module GameDemo
     // 登录请求
     struct LoginReq
     {
-        0 require string qqNumber;
+        0 require string username;
         1 require string password;
     };
 
-    // 登录响应
+    // 登录响应 (V0.4.5: 增加 hasCharacter 和 playerInfo)
     struct LoginRsp
     {
         0 require int ret;
         1 optional string msg;
-        2 optional long accountId;
-        3 optional long playerId;
-        4 optional string qqNumber;
-        5 optional long sessionKey;      // V0.4: 会话密钥
+        2 optional long playerId;           // = accountId
+        3 optional long sessionKey;         // 会话密钥
+        4 optional bool hasCharacter;       // 是否已创建角色
+        5 optional PlayerInfo playerInfo;   // 如果已创建，包含角色信息
     };
 
     // 注册请求
     struct RegisterReq
     {
-        0 require string qqNumber;
+        0 require string username;
         1 require string password;
     };
 
@@ -42,86 +45,50 @@ module GameDemo
     {
         0 require int ret;
         1 optional string msg;
-        2 optional long accountId;
+        2 optional long accountId;          // = playerId
     };
 
-    // 创建角色请求
-    struct CreateRoleReq
+    // 创建角色请求 (V0.4.5: 简化)
+    struct CreateCharacterReq
     {
-        0 require long accountId;
-        1 require string roleName;
-        2 require int job;
+        0 require long playerId;            // = accountId
+        1 require long sessionKey;          // 会话密钥
+        2 require string playerName;       // 玩家名称
+        3 require int job;                  // 职业
     };
 
     // 创建角色响应
-    struct CreateRoleRsp
+    struct CreateCharacterRsp
     {
         0 require int ret;
         1 optional string msg;
-        2 optional RoleInfo role;
-        3 optional long playerId;
-    };
-
-    // 获取角色列表请求
-    struct GetRoleListReq
-    {
-        0 require long accountId;
-    };
-
-    // 获取角色列表响应
-    struct GetRoleListRsp
-    {
-        0 require int ret;
-        1 optional string msg;
-        2 optional vector<RoleInfo> roles;
-    };
-
-    // 选择角色请求
-    struct SelectRoleReq
-    {
-        0 require long accountId;
-        1 require long roleId;
-    };
-
-    // 选择角色响应
-    struct SelectRoleRsp
-    {
-        0 require int ret;
-        1 optional string msg;
-        2 optional long playerId;
-        3 optional RoleInfo role;
+        2 optional PlayerInfo playerInfo;  // 新创建的角色信息
     };
 
     // ========== Lobby 服务接口 ==========
 
     interface LobbyServant
     {
-        // 登录
+        // 登录 (V0.4.5: 登录成功后直接创建 Session)
         int login(LoginReq req, out LoginRsp rsp);
 
         // 注册账号
         int registerAccount(RegisterReq req, out RegisterRsp rsp);
 
-        // 创建角色
-        int createRole(CreateRoleReq req, out CreateRoleRsp rsp);
-
-        // 获取角色列表
-        int getRoleList(GetRoleListReq req, out GetRoleListRsp rsp);
-
-        // 选择角色
-        int selectRole(SelectRoleReq req, out SelectRoleRsp rsp);
+        // 创建角色 (V0.4.5: 一账户只能创建一个角色)
+        int createCharacter(CreateCharacterReq req, out CreateCharacterRsp rsp);
 
         // 心跳
         int heartbeat(HeartBeatReq req);
 
         // 进入场景 (转发给 SceneServer)
-        int enterScene(long playerId, int sceneId, out EnterSceneRsp rsp);
+        int enterScene(EnterSceneReq req, out EnterSceneRsp rsp);
 
         // 移动 (转发给 SceneServer)
         int move(MoveReq req, out MoveRsp rsp);
 
         // 离开场景 (转发给 SceneServer)
-        int leaveScene(long playerId, int sceneId, out LeaveSceneRsp rsp);
+        int leaveScene(LeaveSceneReq req, out LeaveSceneRsp rsp);
 
         // 注册推送回调 (客户端调用以接收服务器推送)
         int registerPush(long playerId);

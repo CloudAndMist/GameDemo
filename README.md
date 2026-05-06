@@ -77,16 +77,20 @@ game-demo/
 │   └── GameDB/                        # 数据库服务
 │       └── src/
 ├── client/                            # 测试客户端
-│   └── TestGameClientV0.2/
+│   └── TestGameClientV0.4.5/           # V0.4.5 测试客户端
 │       └── src/main.cpp               # Tars RPC 调用 + Push 回调
 │
 └── version_md/                        # 版本迭代文档
     ├── 00_项目设计总览.md
+    ├── 00_版本迭代规划.md
+    ├── V0.1_踩坑.md
     ├── V0.1_单Scene最小Demo.md
+    ├── V0.2_踩坑.md
     ├── V0.2_分布式基础架构搭建.md            # PushCallback
     ├── V0.2.5_数据职责边界重构.md
     ├── V0.3_移动同步增强.md            # AOI
     ├── V0.4_心跳与断线重连.md
+    ├── **V0.4.5_修复playerId&roleId混淆.md**  # 一账户一角色
     ├── V0.5_高频数据持久化.md
     └── V0.6_性能压测.md
 ```
@@ -106,5 +110,6 @@ game-demo/
 | V0.2.5 | ✅ | 数据职责边界重构 |
 | V0.3 | ✅ | 移动同步增强 (AOI九宫格) |
 | V0.4 | ✅ | 心跳与断线重连 |
+| V0.4.5 | ✅ | **统一 playerId 体系（一账户一角色）** |
 | V0.5 | 📋 | 高频数据持久化 (TODO) |
 | V0.6 | 📋 | 性能压测 |
