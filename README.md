@@ -7,7 +7,7 @@
 | 类别 | 技术 |
 |------|------|
 | 框架 | Tars C++ |
-| 数据库 | MySQL (角色数据)、TcaplusDB (位置数据) |
+| 数据库 | MySQL (角色数据)、Redis (高频数据) |
 | 协议 | Tars RPC |
 | 构建 | CMake + Docker |
 
@@ -38,8 +38,8 @@
 ┌───────────────────────────────────────────────────────────────────────┐
 │                               DBServer                                |
 │      【DBObj】                               【KVObj】                 |
-│                                                                       |
-│     MySQL:                                   TcaplusDB:               |           存储层
+│                                                                        |
+│     MySQL:                                   Redis:                    |           存储层
 │    • 角色数据                                 • 高频位置存储            |
 │    • 会话管理                                 • 玩家数据                |
 └───────────────────────────────────────────────────────────────────────┘
@@ -48,10 +48,10 @@
 
 **通信说明**：
 - **Client ↔ LobbyServer**: RPC 请求 + PushCallback 推送
-- **LobbyServer ↔ DBServer (GameDBObj)**: RPC 调用，角色数据读写
+- **LobbyServer ↔ DBServer (DBObj)**: RPC 调用，角色数据读写
 - **LobbyServer ↔ SceneServer**: RPC 调用，场景创建、玩家进入/离开
 - **SceneServer → LobbyServer**: 异步 RPC，Scene 主动调用 Lobby 的 Push 方法推送玩家事件
-- **SceneServer ↔ DBServer (GameDBTcaplus)**: 高频数据持久化存储
+- **SceneServer ↔ DBServer (KVObj)**: 高频数据持久化存储
 
 ## 项目目录
 
@@ -74,8 +74,10 @@ game-demo/
 │   │   │   ├── Scene.h / Scene.tars
 │   │   │   └── SceneImp.cpp
 │   │   └── build/
-│   └── GameDB/                        # 数据库服务
-│       └── src/
+│   └── DBServer/                      # 数据库服务
+│       ├── src/                       # DBServant + KVServant (Redis)
+│       ├── test/                       # 单元测试
+│       └── init_db.sql                 # 数据库初始化
 ├── client/                            # 测试客户端
 │   └── TestGameClientV0.4.5/           # V0.4.5 测试客户端
 │       └── src/main.cpp               # Tars RPC 调用 + Push 回调
