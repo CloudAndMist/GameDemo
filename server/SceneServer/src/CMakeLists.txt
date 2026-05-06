@@ -8,6 +8,7 @@ set(TARS_TOOL_FLAG "--include=/home/tarsproto/GameDemo/GameDemoBase")
 # 包含公共头文件目录
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(/usr/local/tars/cpp/include)
+include_directories(/home/tarsproto/GameDemo/DBServer)
 include_directories(/home/tarsproto/GameDemo/GameDemoBase)
 
 # 生成 SceneServer 服务

@@ -1,5 +1,6 @@
 ﻿#include "SceneServer.h"
 #include "SceneImp.h"
+#include "DB.h"
 
 SceneServer g_app;
 
@@ -11,6 +12,13 @@ void SceneServer::initialize()
     // 初始化玩家管理器（在 SceneServer 层初始化，确保全局唯一）
     // TODO: 配置化（从配置文件读取）
     _playerManager.init(1000, 1000, 10.0f);  // 场景 1000x1000，格子 10x10
+
+    // V0.5: 初始化 KV 代理（通过服务发现连接 DBServer 的 KVServant）
+    _playerManager.setKVPrx(Application::getCommunicator()->stringToProxy<GameDemo::KVServantPrx>(
+        ServerConfig::Application + ".DBServer.KVObj"));
+    
+    // V0.5: 启动定时全量快照（每 30 秒）
+    _playerManager.startPeriodicSnapshot(30);
 
     // 注册 SceneServant 接口
     addServant<SceneImp>(ServerConfig::Application + "." + ServerConfig::ServerName + ".SceneObj");

@@ -21,6 +21,2381 @@ using namespace std;
 
 namespace GameDemo
 {
+    const tars::Int32 ERR_KV_NOT_FOUND = 6001;
+
+    struct PlayerKVData : public tars::TarsStructBase
+    {
+    public:
+        static string className()
+        {
+            return "GameDemo.PlayerKVData";
+        }
+        static string MD5()
+        {
+            return "e103403fb52367e61960529ae14134e9";
+        }
+        PlayerKVData()
+        {
+            resetDefautlt();
+        }
+        void resetDefautlt()
+        {
+            playerId = 0;
+            level = 0;
+            x = 0;
+            y = 0;
+            z = 0;
+            sceneId = 0;
+            updateTime = 0;
+        }
+        template<typename WriterT>
+        void writeTo(tars::TarsOutputStream<WriterT>& _os) const
+        {
+            _os.write(playerId, 0);
+            _os.write(level, 1);
+            _os.write(x, 2);
+            _os.write(y, 3);
+            _os.write(z, 4);
+            _os.write(sceneId, 5);
+            if (updateTime != 0)
+            {
+                _os.write(updateTime, 6);
+            }
+        }
+        template<typename ReaderT>
+        void readFrom(tars::TarsInputStream<ReaderT>& _is)
+        {
+            resetDefautlt();
+            _is.read(playerId, 0, true);
+            _is.read(level, 1, true);
+            _is.read(x, 2, true);
+            _is.read(y, 3, true);
+            _is.read(z, 4, true);
+            _is.read(sceneId, 5, true);
+            _is.read(updateTime, 6, false);
+        }
+        tars::JsonValueObjPtr writeToJson() const
+        {
+            tars::JsonValueObjPtr p = new tars::JsonValueObj();
+            p->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+            p->value["level"] = tars::JsonOutput::writeJson(level);
+            p->value["x"] = tars::JsonOutput::writeJson(x);
+            p->value["y"] = tars::JsonOutput::writeJson(y);
+            p->value["z"] = tars::JsonOutput::writeJson(z);
+            p->value["sceneId"] = tars::JsonOutput::writeJson(sceneId);
+            p->value["updateTime"] = tars::JsonOutput::writeJson(updateTime);
+            return p;
+        }
+        string writeToJsonString() const
+        {
+            return tars::TC_Json::writeValue(writeToJson());
+        }
+        void readFromJson(const tars::JsonValuePtr & p, bool isRequire = true)
+        {
+            resetDefautlt();
+            if(NULL == p.get() || p->getType() != tars::eJsonTypeObj)
+            {
+                char s[128];
+                snprintf(s, sizeof(s), "read 'struct' type mismatch, get type: %d.", (p.get() ? p->getType() : 0));
+                throw tars::TC_Json_Exception(s);
+            }
+            tars::JsonValueObjPtr pObj=tars::JsonValueObjPtr::dynamicCast(p);
+            tars::JsonInput::readJson(playerId,pObj->value["playerId"], true);
+            tars::JsonInput::readJson(level,pObj->value["level"], true);
+            tars::JsonInput::readJson(x,pObj->value["x"], true);
+            tars::JsonInput::readJson(y,pObj->value["y"], true);
+            tars::JsonInput::readJson(z,pObj->value["z"], true);
+            tars::JsonInput::readJson(sceneId,pObj->value["sceneId"], true);
+            tars::JsonInput::readJson(updateTime,pObj->value["updateTime"], false);
+        }
+        void readFromJsonString(const string & str)
+        {
+            readFromJson(tars::TC_Json::getValue(str));
+        }
+        ostream& display(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.display(playerId,"playerId");
+            _ds.display(level,"level");
+            _ds.display(x,"x");
+            _ds.display(y,"y");
+            _ds.display(z,"z");
+            _ds.display(sceneId,"sceneId");
+            _ds.display(updateTime,"updateTime");
+            return _os;
+        }
+        ostream& displaySimple(ostream& _os, int _level=0) const
+        {
+            tars::TarsDisplayer _ds(_os, _level);
+            _ds.displaySimple(playerId, true);
+            _ds.displaySimple(level, true);
+            _ds.displaySimple(x, true);
+            _ds.displaySimple(y, true);
+            _ds.displaySimple(z, true);
+            _ds.displaySimple(sceneId, true);
+            _ds.displaySimple(updateTime, false);
+            return _os;
+        }
+    public:
+        tars::Int64 playerId;
+        tars::Int32 level;
+        tars::Float x;
+        tars::Float y;
+        tars::Float z;
+        tars::Int32 sceneId;
+        tars::Int64 updateTime;
+    };
+    inline bool operator==(const PlayerKVData&l, const PlayerKVData&r)
+    {
+        return l.playerId == r.playerId && l.level == r.level && tars::TC_Common::equal(l.x,r.x) && tars::TC_Common::equal(l.y,r.y) && tars::TC_Common::equal(l.z,r.z) && l.sceneId == r.sceneId && l.updateTime == r.updateTime;
+    }
+    inline bool operator!=(const PlayerKVData&l, const PlayerKVData&r)
+    {
+        return !(l == r);
+    }
+    inline ostream& operator<<(ostream & os,const PlayerKVData&r)
+    {
+        os << r.writeToJsonString();
+        return os;
+    }
+    inline istream& operator>>(istream& is,PlayerKVData&l)
+    {
+        std::istreambuf_iterator<char> eos;
+        std::string s(std::istreambuf_iterator<char>(is), eos);
+        l.readFromJsonString(s);
+        return is;
+    }
+
+
+    /* callback of async proxy for client */
+    class KVServantPrxCallback: public tars::ServantProxyCallback
+    {
+    public:
+        virtual ~KVServantPrxCallback(){}
+        virtual void callback_batchGetPlayerData(tars::Int32 ret,  const vector<GameDemo::PlayerKVData>& dataList)
+        { throw std::runtime_error("callback_batchGetPlayerData() override incorrect."); }
+        virtual void callback_batchGetPlayerData_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_batchGetPlayerData_exception() override incorrect."); }
+
+        virtual void callback_batchSavePlayerData(tars::Int32 ret)
+        { throw std::runtime_error("callback_batchSavePlayerData() override incorrect."); }
+        virtual void callback_batchSavePlayerData_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_batchSavePlayerData_exception() override incorrect."); }
+
+        virtual void callback_deletePlayerData(tars::Int32 ret)
+        { throw std::runtime_error("callback_deletePlayerData() override incorrect."); }
+        virtual void callback_deletePlayerData_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_deletePlayerData_exception() override incorrect."); }
+
+        virtual void callback_getPlayerData(tars::Int32 ret,  const GameDemo::PlayerKVData& data)
+        { throw std::runtime_error("callback_getPlayerData() override incorrect."); }
+        virtual void callback_getPlayerData_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_getPlayerData_exception() override incorrect."); }
+
+        virtual void callback_savePlayerData(tars::Int32 ret)
+        { throw std::runtime_error("callback_savePlayerData() override incorrect."); }
+        virtual void callback_savePlayerData_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_savePlayerData_exception() override incorrect."); }
+
+    public:
+        virtual const map<std::string, std::string> & getResponseContext() const
+        {
+            CallbackThreadData * pCbtd = CallbackThreadData::getData();
+            assert(pCbtd != NULL);
+
+            if(!pCbtd->getContextValid())
+            {
+                throw TC_Exception("cann't get response context");
+            }
+            return pCbtd->getResponseContext();
+        }
+
+    public:
+        virtual int onDispatch(tars::ReqMessagePtr _msg_)
+        {
+            static ::std::string __KVServant_all[]=
+            {
+                "batchGetPlayerData",
+                "batchSavePlayerData",
+                "deletePlayerData",
+                "getPlayerData",
+                "savePlayerData"
+            };
+            auto it = _msg_->response->status.find("TARS_FUNC");
+            pair<string*, string*> r = equal_range(__KVServant_all, __KVServant_all+5, (it==_msg_->response->status.end())?_msg_->request.sFuncName:it->second);
+            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
+            switch(r.first - __KVServant_all)
+            {
+                case 0:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_batchGetPlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    vector<GameDemo::PlayerKVData> dataList;
+                    _is.read(dataList, 2, true);
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchGetPlayerData", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_batchGetPlayerData(_ret, dataList);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 1:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_batchSavePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchSavePlayerData", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_batchSavePlayerData(_ret);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 2:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_deletePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "deletePlayerData", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_deletePlayerData(_ret);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 3:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_getPlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    GameDemo::PlayerKVData data;
+                    _is.read(data, 2, true);
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "getPlayerData", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_getPlayerData(_ret, data);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_savePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "savePlayerData", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_savePlayerData(_ret);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+            }
+            return tars::TARSSERVERNOFUNCERR;
+        }
+
+    };
+    typedef tars::TC_AutoPtr<KVServantPrxCallback> KVServantPrxCallbackPtr;
+
+    //callback of promise async proxy for client
+    class KVServantPrxCallbackPromise: public tars::ServantProxyCallback
+    {
+    public:
+        virtual ~KVServantPrxCallbackPromise(){}
+    public:
+        struct PromisebatchGetPlayerData: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            vector<GameDemo::PlayerKVData> dataList;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< KVServantPrxCallbackPromise::PromisebatchGetPlayerData > PromisebatchGetPlayerDataPtr;
+
+        KVServantPrxCallbackPromise(const tars::Promise< KVServantPrxCallbackPromise::PromisebatchGetPlayerDataPtr > &promise)
+        : _promise_batchGetPlayerData(promise)
+        {}
+        
+        virtual void callback_batchGetPlayerData(const KVServantPrxCallbackPromise::PromisebatchGetPlayerDataPtr &ptr)
+        {
+            _promise_batchGetPlayerData.setValue(ptr);
+        }
+        virtual void callback_batchGetPlayerData_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:batchGetPlayerData_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_batchGetPlayerData.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< KVServantPrxCallbackPromise::PromisebatchGetPlayerDataPtr > _promise_batchGetPlayerData;
+
+    public:
+        struct PromisebatchSavePlayerData: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< KVServantPrxCallbackPromise::PromisebatchSavePlayerData > PromisebatchSavePlayerDataPtr;
+
+        KVServantPrxCallbackPromise(const tars::Promise< KVServantPrxCallbackPromise::PromisebatchSavePlayerDataPtr > &promise)
+        : _promise_batchSavePlayerData(promise)
+        {}
+        
+        virtual void callback_batchSavePlayerData(const KVServantPrxCallbackPromise::PromisebatchSavePlayerDataPtr &ptr)
+        {
+            _promise_batchSavePlayerData.setValue(ptr);
+        }
+        virtual void callback_batchSavePlayerData_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:batchSavePlayerData_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_batchSavePlayerData.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< KVServantPrxCallbackPromise::PromisebatchSavePlayerDataPtr > _promise_batchSavePlayerData;
+
+    public:
+        struct PromisedeletePlayerData: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< KVServantPrxCallbackPromise::PromisedeletePlayerData > PromisedeletePlayerDataPtr;
+
+        KVServantPrxCallbackPromise(const tars::Promise< KVServantPrxCallbackPromise::PromisedeletePlayerDataPtr > &promise)
+        : _promise_deletePlayerData(promise)
+        {}
+        
+        virtual void callback_deletePlayerData(const KVServantPrxCallbackPromise::PromisedeletePlayerDataPtr &ptr)
+        {
+            _promise_deletePlayerData.setValue(ptr);
+        }
+        virtual void callback_deletePlayerData_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:deletePlayerData_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_deletePlayerData.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< KVServantPrxCallbackPromise::PromisedeletePlayerDataPtr > _promise_deletePlayerData;
+
+    public:
+        struct PromisegetPlayerData: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            GameDemo::PlayerKVData data;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< KVServantPrxCallbackPromise::PromisegetPlayerData > PromisegetPlayerDataPtr;
+
+        KVServantPrxCallbackPromise(const tars::Promise< KVServantPrxCallbackPromise::PromisegetPlayerDataPtr > &promise)
+        : _promise_getPlayerData(promise)
+        {}
+        
+        virtual void callback_getPlayerData(const KVServantPrxCallbackPromise::PromisegetPlayerDataPtr &ptr)
+        {
+            _promise_getPlayerData.setValue(ptr);
+        }
+        virtual void callback_getPlayerData_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:getPlayerData_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_getPlayerData.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< KVServantPrxCallbackPromise::PromisegetPlayerDataPtr > _promise_getPlayerData;
+
+    public:
+        struct PromisesavePlayerData: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< KVServantPrxCallbackPromise::PromisesavePlayerData > PromisesavePlayerDataPtr;
+
+        KVServantPrxCallbackPromise(const tars::Promise< KVServantPrxCallbackPromise::PromisesavePlayerDataPtr > &promise)
+        : _promise_savePlayerData(promise)
+        {}
+        
+        virtual void callback_savePlayerData(const KVServantPrxCallbackPromise::PromisesavePlayerDataPtr &ptr)
+        {
+            _promise_savePlayerData.setValue(ptr);
+        }
+        virtual void callback_savePlayerData_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:savePlayerData_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_savePlayerData.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< KVServantPrxCallbackPromise::PromisesavePlayerDataPtr > _promise_savePlayerData;
+
+    public:
+        virtual int onDispatch(tars::ReqMessagePtr _msg_)
+        {
+            static ::std::string __KVServant_all[]=
+            {
+                "batchGetPlayerData",
+                "batchSavePlayerData",
+                "deletePlayerData",
+                "getPlayerData",
+                "savePlayerData"
+            };
+
+            pair<string*, string*> r = equal_range(__KVServant_all, __KVServant_all+5, string(_msg_->request.sFuncName));
+            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
+            switch(r.first - __KVServant_all)
+            {
+                case 0:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_batchGetPlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    KVServantPrxCallbackPromise::PromisebatchGetPlayerDataPtr ptr = new KVServantPrxCallbackPromise::PromisebatchGetPlayerData();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                        _is.read(ptr->dataList, 2, true);
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_batchGetPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_batchGetPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_batchGetPlayerData(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 1:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_batchSavePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    KVServantPrxCallbackPromise::PromisebatchSavePlayerDataPtr ptr = new KVServantPrxCallbackPromise::PromisebatchSavePlayerData();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_batchSavePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_batchSavePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_batchSavePlayerData(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 2:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_deletePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    KVServantPrxCallbackPromise::PromisedeletePlayerDataPtr ptr = new KVServantPrxCallbackPromise::PromisedeletePlayerData();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_deletePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_deletePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_deletePlayerData(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 3:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_getPlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    KVServantPrxCallbackPromise::PromisegetPlayerDataPtr ptr = new KVServantPrxCallbackPromise::PromisegetPlayerData();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                        _is.read(ptr->data, 2, true);
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_getPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_getPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_getPlayerData(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_savePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    KVServantPrxCallbackPromise::PromisesavePlayerDataPtr ptr = new KVServantPrxCallbackPromise::PromisesavePlayerData();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_savePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_savePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_savePlayerData(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+            }
+            return tars::TARSSERVERNOFUNCERR;
+        }
+
+    };
+    typedef tars::TC_AutoPtr<KVServantPrxCallbackPromise> KVServantPrxCallbackPromisePtr;
+
+    /* callback of coroutine async proxy for client */
+    class KVServantCoroPrxCallback: public KVServantPrxCallback
+    {
+    public:
+        virtual ~KVServantCoroPrxCallback(){}
+    public:
+        virtual const map<std::string, std::string> & getResponseContext() const { return _mRspContext; }
+
+        virtual void setResponseContext(const map<std::string, std::string> &mContext) { _mRspContext = mContext; }
+
+    public:
+        int onDispatch(tars::ReqMessagePtr _msg_)
+        {
+            static ::std::string __KVServant_all[]=
+            {
+                "batchGetPlayerData",
+                "batchSavePlayerData",
+                "deletePlayerData",
+                "getPlayerData",
+                "savePlayerData"
+            };
+
+            pair<string*, string*> r = equal_range(__KVServant_all, __KVServant_all+5, string(_msg_->request.sFuncName));
+            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
+            switch(r.first - __KVServant_all)
+            {
+                case 0:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_batchGetPlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        vector<GameDemo::PlayerKVData> dataList;
+                        _is.read(dataList, 2, true);
+                        setResponseContext(_msg_->response->context);
+
+                        callback_batchGetPlayerData(_ret, dataList);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_batchGetPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_batchGetPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 1:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_batchSavePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        setResponseContext(_msg_->response->context);
+
+                        callback_batchSavePlayerData(_ret);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_batchSavePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_batchSavePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 2:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_deletePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        setResponseContext(_msg_->response->context);
+
+                        callback_deletePlayerData(_ret);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_deletePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_deletePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 3:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_getPlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        GameDemo::PlayerKVData data;
+                        _is.read(data, 2, true);
+                        setResponseContext(_msg_->response->context);
+
+                        callback_getPlayerData(_ret, data);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_getPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_getPlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
+                        callback_savePlayerData_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        setResponseContext(_msg_->response->context);
+
+                        callback_savePlayerData(_ret);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_savePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_savePlayerData_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+            }
+            return tars::TARSSERVERNOFUNCERR;
+        }
+
+    protected:
+        map<std::string, std::string> _mRspContext;
+    };
+    typedef tars::TC_AutoPtr<KVServantCoroPrxCallback> KVServantCoroPrxCallbackPtr;
+
+    /* proxy for client */
+    class KVServantProxy : public tars::ServantProxy
+    {
+    public:
+        typedef map<string, string> TARS_CONTEXT;
+        tars::Int32 batchGetPlayerData(const vector<tars::Int64> & playerIds,vector<GameDemo::PlayerKVData> &dataList,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerIds, 1);
+            _os.write(dataList, 2);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerIds"] = tars::JsonOutput::writeJson(playerIds);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "batchGetPlayerData", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"batchGetPlayerData", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            _is.read(dataList, 2, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "batchGetPlayerData", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_batchGetPlayerData(KVServantPrxCallbackPtr callback,const vector<tars::Int64> &playerIds,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerIds, 1);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerIds"] = tars::JsonOutput::writeJson(playerIds);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "batchGetPlayerData", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"batchGetPlayerData", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< KVServantPrxCallbackPromise::PromisebatchGetPlayerDataPtr > promise_async_batchGetPlayerData(const vector<tars::Int64> &playerIds,const map<string, string>& context)
+        {
+            tars::Promise< KVServantPrxCallbackPromise::PromisebatchGetPlayerDataPtr > promise;
+            KVServantPrxCallbackPromisePtr callback = new KVServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerIds, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"batchGetPlayerData", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_batchGetPlayerData(KVServantCoroPrxCallbackPtr callback,const vector<tars::Int64> &playerIds,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerIds, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"batchGetPlayerData", _os, context, _mStatus, callback, true);
+        }
+
+        tars::Int32 batchSavePlayerData(const vector<GameDemo::PlayerKVData> & dataList,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(dataList, 1);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "batchSavePlayerData", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"batchSavePlayerData", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "batchSavePlayerData", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_batchSavePlayerData(KVServantPrxCallbackPtr callback,const vector<GameDemo::PlayerKVData> &dataList,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(dataList, 1);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "batchSavePlayerData", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"batchSavePlayerData", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< KVServantPrxCallbackPromise::PromisebatchSavePlayerDataPtr > promise_async_batchSavePlayerData(const vector<GameDemo::PlayerKVData> &dataList,const map<string, string>& context)
+        {
+            tars::Promise< KVServantPrxCallbackPromise::PromisebatchSavePlayerDataPtr > promise;
+            KVServantPrxCallbackPromisePtr callback = new KVServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(dataList, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"batchSavePlayerData", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_batchSavePlayerData(KVServantCoroPrxCallbackPtr callback,const vector<GameDemo::PlayerKVData> &dataList,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(dataList, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"batchSavePlayerData", _os, context, _mStatus, callback, true);
+        }
+
+        tars::Int32 deletePlayerData(tars::Int64 playerId,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "deletePlayerData", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"deletePlayerData", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "deletePlayerData", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_deletePlayerData(KVServantPrxCallbackPtr callback,tars::Int64 playerId,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "deletePlayerData", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"deletePlayerData", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< KVServantPrxCallbackPromise::PromisedeletePlayerDataPtr > promise_async_deletePlayerData(tars::Int64 playerId,const map<string, string>& context)
+        {
+            tars::Promise< KVServantPrxCallbackPromise::PromisedeletePlayerDataPtr > promise;
+            KVServantPrxCallbackPromisePtr callback = new KVServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"deletePlayerData", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_deletePlayerData(KVServantCoroPrxCallbackPtr callback,tars::Int64 playerId,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"deletePlayerData", _os, context, _mStatus, callback, true);
+        }
+
+        tars::Int32 getPlayerData(tars::Int64 playerId,GameDemo::PlayerKVData &data,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            _os.write(data, 2);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "getPlayerData", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"getPlayerData", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            _is.read(data, 2, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "getPlayerData", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_getPlayerData(KVServantPrxCallbackPtr callback,tars::Int64 playerId,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "getPlayerData", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"getPlayerData", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< KVServantPrxCallbackPromise::PromisegetPlayerDataPtr > promise_async_getPlayerData(tars::Int64 playerId,const map<string, string>& context)
+        {
+            tars::Promise< KVServantPrxCallbackPromise::PromisegetPlayerDataPtr > promise;
+            KVServantPrxCallbackPromisePtr callback = new KVServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"getPlayerData", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_getPlayerData(KVServantCoroPrxCallbackPtr callback,tars::Int64 playerId,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"getPlayerData", _os, context, _mStatus, callback, true);
+        }
+
+        tars::Int32 savePlayerData(const GameDemo::PlayerKVData & data,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(data, 1);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "savePlayerData", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"savePlayerData", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "savePlayerData", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_savePlayerData(KVServantPrxCallbackPtr callback,const GameDemo::PlayerKVData &data,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(data, 1);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "savePlayerData", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"savePlayerData", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< KVServantPrxCallbackPromise::PromisesavePlayerDataPtr > promise_async_savePlayerData(const GameDemo::PlayerKVData &data,const map<string, string>& context)
+        {
+            tars::Promise< KVServantPrxCallbackPromise::PromisesavePlayerDataPtr > promise;
+            KVServantPrxCallbackPromisePtr callback = new KVServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(data, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"savePlayerData", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_savePlayerData(KVServantCoroPrxCallbackPtr callback,const GameDemo::PlayerKVData &data,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(data, 1);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"savePlayerData", _os, context, _mStatus, callback, true);
+        }
+
+        KVServantProxy* tars_hash(uint32_t key)
+        {
+            return (KVServantProxy*)ServantProxy::tars_hash(key);
+        }
+
+        KVServantProxy* tars_consistent_hash(uint32_t key)
+        {
+            return (KVServantProxy*)ServantProxy::tars_consistent_hash(key);
+        }
+
+        KVServantProxy* tars_open_trace(bool traceParam = false)
+        {
+            return (KVServantProxy*)ServantProxy::tars_open_trace(traceParam);
+        }
+
+        KVServantProxy* tars_set_timeout(int msecond)
+        {
+            return (KVServantProxy*)ServantProxy::tars_set_timeout(msecond);
+        }
+
+        static const char* tars_prxname() { return "KVServantProxy"; }
+    };
+    typedef tars::TC_AutoPtr<KVServantProxy> KVServantPrx;
+
+    /* servant for server */
+    class KVServant : public tars::Servant
+    {
+    public:
+        virtual ~KVServant(){}
+        virtual tars::Int32 batchGetPlayerData(const vector<tars::Int64> & playerIds,vector<GameDemo::PlayerKVData> &dataList,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_batchGetPlayerData(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const vector<GameDemo::PlayerKVData> &dataList)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+                _tarsAttr_.put("dataList", dataList);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _os.write(dataList, 2);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchGetPlayerData", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_batchGetPlayerData(tars::CurrentPtr _current_, tars::Int32 _ret, const vector<GameDemo::PlayerKVData> &dataList, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _os.write(dataList, 2);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"batchGetPlayerData", _os, _context);
+            }
+        }
+
+        virtual tars::Int32 batchSavePlayerData(const vector<GameDemo::PlayerKVData> & dataList,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_batchSavePlayerData(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchSavePlayerData", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_batchSavePlayerData(tars::CurrentPtr _current_, tars::Int32 _ret, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"batchSavePlayerData", _os, _context);
+            }
+        }
+
+        virtual tars::Int32 deletePlayerData(tars::Int64 playerId,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_deletePlayerData(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "deletePlayerData", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_deletePlayerData(tars::CurrentPtr _current_, tars::Int32 _ret, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"deletePlayerData", _os, _context);
+            }
+        }
+
+        virtual tars::Int32 getPlayerData(tars::Int64 playerId,GameDemo::PlayerKVData &data,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_getPlayerData(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const GameDemo::PlayerKVData &data)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+                _tarsAttr_.put("data", data);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["data"] = tars::JsonOutput::writeJson(data);
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _os.write(data, 2);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "getPlayerData", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_getPlayerData(tars::CurrentPtr _current_, tars::Int32 _ret, const GameDemo::PlayerKVData &data, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _os.write(data, 2);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"getPlayerData", _os, _context);
+            }
+        }
+
+        virtual tars::Int32 savePlayerData(const GameDemo::PlayerKVData & data,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_savePlayerData(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "savePlayerData", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_savePlayerData(tars::CurrentPtr _current_, tars::Int32 _ret, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"savePlayerData", _os, _context);
+            }
+        }
+
+    public:
+        int onDispatch(tars::TarsCurrentPtr _current, vector<char> &_sResponseBuffer)
+        {
+            static ::std::string __GameDemo__KVServant_all[]=
+            {
+                "batchGetPlayerData",
+                "batchSavePlayerData",
+                "deletePlayerData",
+                "getPlayerData",
+                "savePlayerData"
+            };
+
+            pair<string*, string*> r = equal_range(__GameDemo__KVServant_all, __GameDemo__KVServant_all+5, _current->getFuncName());
+            if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
+            switch(r.first - __GameDemo__KVServant_all)
+            {
+                case 0:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
+                    vector<tars::Int64> playerIds;
+                    vector<GameDemo::PlayerKVData> dataList;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("playerIds", playerIds);
+                        _tarsAttr_.getByDefault("dataList", dataList, dataList);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(playerIds, _jsonPtr->value["playerIds"], true);
+                        tars::JsonInput::readJson(dataList, _jsonPtr->value["dataList"], false);
+                    }
+                    else
+                    {
+                        _is.read(playerIds, 1, true);
+                        _is.read(dataList, 2, false);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["playerIds"] = tars::JsonOutput::writeJson(playerIds);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchGetPlayerData", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = batchGetPlayerData(playerIds,dataList, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.put("dataList", dataList);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.write(dataList, 2);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchGetPlayerData", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 1:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
+                    vector<GameDemo::PlayerKVData> dataList;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("dataList", dataList);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(dataList, _jsonPtr->value["dataList"], true);
+                    }
+                    else
+                    {
+                        _is.read(dataList, 1, true);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["dataList"] = tars::JsonOutput::writeJson(dataList);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchSavePlayerData", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = batchSavePlayerData(dataList, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "batchSavePlayerData", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 2:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
+                    tars::Int64 playerId;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("playerId", playerId);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], true);
+                    }
+                    else
+                    {
+                        _is.read(playerId, 1, true);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "deletePlayerData", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = deletePlayerData(playerId, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "deletePlayerData", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 3:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
+                    tars::Int64 playerId;
+                    GameDemo::PlayerKVData data;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("playerId", playerId);
+                        _tarsAttr_.getByDefault("data", data, data);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], true);
+                        tars::JsonInput::readJson(data, _jsonPtr->value["data"], false);
+                    }
+                    else
+                    {
+                        _is.read(playerId, 1, true);
+                        _is.read(data, 2, false);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "getPlayerData", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = getPlayerData(playerId,data, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.put("data", data);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["data"] = tars::JsonOutput::writeJson(data);
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.write(data, 2);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "getPlayerData", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 4:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
+                    GameDemo::PlayerKVData data;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("data", data);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(data, _jsonPtr->value["data"], true);
+                    }
+                    else
+                    {
+                        _is.read(data, 1, true);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["data"] = tars::JsonOutput::writeJson(data);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "savePlayerData", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = savePlayerData(data, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "savePlayerData", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+            }
+            return tars::TARSSERVERNOFUNCERR;
+        }
+    };
+
 
     /* callback of async proxy for client */
     class DBServantPrxCallback: public tars::ServantProxyCallback

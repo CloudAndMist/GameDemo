@@ -41,15 +41,34 @@ tars::Int32 SceneImp::enterScene(const EnterSceneReq &req, EnterSceneRsp &rsp, t
 
     rsp.ret = 0;
     rsp.msg = "success";
-    rsp.self = {};
-    rsp.self.playerId = req.playerId;
-    rsp.self.sceneId = req.sceneId;
-    rsp.self.level = 1;
 
-    // 通过 PlayerManager 添加玩家（一次性完成数据和 AOI 格子添加）
-    _playerMgr->playerEnter(req.playerId, 0.0f, 0.0f, 0.0f, req.sceneId, 1);
+    // 获取进入前的旧视野玩家（用于跨场景切换时通知）
+    vector<tars::Int64> oldViewPlayers = _playerMgr->getViewPlayers(req.playerId);
+    int32_t oldSceneId = 0;
+    auto* existingPlayer = _playerMgr->getPlayer(req.playerId);
+    if (existingPlayer) {
+        oldSceneId = existingPlayer->sceneId;
+    }
 
-    // 获取视野内玩家
+    // V0.5: 从 Redis 恢复玩家数据（内存无 → 恢复/初始化）
+    // 返回 true 表示发生了跨场景切换
+    bool crossSceneSwitch = _playerMgr->restoreOnEnter(req.playerId, req.sceneId);
+
+    // 获取当前玩家信息
+    auto* selfPlayer = _playerMgr->getPlayer(req.playerId);
+    if (selfPlayer) {
+        rsp.self = _playerMgr->toPlayerBaseInfo(*selfPlayer);
+    } else {
+        // 不太可能发生，但做保护
+        rsp.self.playerId = req.playerId;
+        rsp.self.sceneId = req.sceneId;
+        rsp.self.level = 1;
+        rsp.self.posX = 0.0f;
+        rsp.self.posY = 0.0f;
+        rsp.self.posZ = 0.0f;
+    }
+
+    // 获取视野内玩家（基于新场景）
     vector<tars::Int64> viewPlayers = _playerMgr->getViewPlayers(req.playerId);
 
     // 填充视野内其他玩家信息
@@ -58,26 +77,19 @@ tars::Int32 SceneImp::enterScene(const EnterSceneReq &req, EnterSceneRsp &rsp, t
         auto* p = _playerMgr->getPlayer(pid);
         if (p)
         {
-            PlayerBaseInfo info;
-            info.playerId = p->playerId;
-            info.sceneId = p->sceneId;
-            info.level = p->level;
-            info.posX = p->x;
-            info.posY = p->y;
-            info.posZ = p->z;
-            rsp.players.push_back(info);
+            rsp.players.push_back(_playerMgr->toPlayerBaseInfo(*p));
         }
     }
 
-    // 异步通知 LobbyServer 有新玩家进入（使用 PlayerBaseInfo）
-    PlayerBaseInfo selfInfo;
-    selfInfo.playerId = req.playerId;
-    selfInfo.sceneId = req.sceneId;
-    selfInfo.level = 1;
-    selfInfo.posX = 0.0f;
-    selfInfo.posY = 0.0f;
-    selfInfo.posZ = 0.0f;
-    notifyPlayerEnter(req.playerId, req.sceneId, selfInfo, viewPlayers);
+    // 跨场景切换：先通知旧场景玩家该玩家已离开
+    if (crossSceneSwitch && oldSceneId != req.sceneId && !oldViewPlayers.empty()) {
+        notifyPlayerLeave(req.playerId, oldSceneId, oldViewPlayers);
+        TLOG_DEBUG("SceneImp::enterScene notified " << oldViewPlayers.size() 
+                  << " players in old scene " << oldSceneId << endl);
+    }
+
+    // 异步通知 LobbyServer 有新玩家进入
+    notifyPlayerEnter(req.playerId, req.sceneId, rsp.self, viewPlayers);
 
     TLOG_DEBUG("SceneImp::enterScene success, playerId=" << req.playerId << ", otherPlayers=" << rsp.players.size() << endl);
     return 0;
@@ -229,8 +241,8 @@ tars::Int32 SceneImp::playerOffline(tars::Int64 playerId, tars::Int32 sceneId, t
         return 0;
     }
 
-    // 标记为离线（不改变 AOI 结构，只改变状态标志）
-    _playerMgr->setOnline(playerId, false);
+    // V0.5: 断线必须同步保存数据到 Redis
+    _playerMgr->onPlayerOffline(playerId);
 
     // 通知周围玩家该玩家掉线
     vector<tars::Int64> notifyList = _playerMgr->getViewPlayers(playerId);

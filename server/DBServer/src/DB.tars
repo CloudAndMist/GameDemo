@@ -1,12 +1,47 @@
 // ========== DB.tars ==========
-// V0.4.5 数据库服务接口
-// 一账户一角色：账号和角色数据合并到 accounts 表
+// V0.5 数据库服务接口
+// - V0.4.5: 账号/角色 MySQL 持久化
+// - V0.5: 高频数据 Redis 持久化
 
 #include "GameDemoBase.tars"
 
 module GameDemo
 {
-    // Database Servant
+    // ========== 高频数据错误码 ==========
+    const int ERR_KV_NOT_FOUND = 6001;
+
+    // ========== 高频玩家数据 (位置快照) ==========
+    struct PlayerKVData
+    {
+        0 require long playerId;       // 玩家ID (主键 Key)
+        1 require int level;           // 等级
+        2 require float x;             // 位置X
+        3 require float y;             // 位置Y
+        4 require float z;             // 位置Z
+        5 require int sceneId;         // 场景ID
+        6 optional long updateTime;    // 更新时间
+    };
+
+    // ========== KV 服务接口 ==========
+    interface KVServant
+    {
+        // 保存单个玩家数据 (Tars 自动生成 async_xxx 异步版本)
+        int savePlayerData(PlayerKVData data);
+        
+        // 批量保存
+        int batchSavePlayerData(vector<PlayerKVData> dataList);
+        
+        // 获取玩家数据
+        int getPlayerData(long playerId, out PlayerKVData data);
+
+        // 删除玩家数据
+        int deletePlayerData(long playerId);
+
+        // 批量获取
+        int batchGetPlayerData(vector<long> playerIds, out vector<PlayerKVData> dataList);
+    };
+
+    // ========== 数据库服务接口 ==========
     interface DBServant
     {
         // ========== 账号操作 ==========

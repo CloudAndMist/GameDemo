@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(Demo-DemoServer)
+# 指定明确的编译器（避免 CompilerId multiple definition 问题）
+set(CMAKE_C_COMPILER /usr/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
+
+project(Demo-DemoServer LANGUAGES CXX)
 
 option(TARS_MYSQL "option for mysql" ON)
 option(TARS_SSL "option for ssl" OFF)
@@ -20,8 +24,6 @@ ENDIF ()
 
 include_directories(/usr/local/tars/cpp/thirdparty/include)
 link_directories(/usr/local/tars/cpp/thirdparty/lib)
-
-#include_directories(/home/tarsprotol/App/OtherServer)
 
 add_subdirectory(src)
 

@@ -1,5 +1,6 @@
 ﻿#include "DBServer.h"
 #include "DBImp.h"
+#include "KVImp.h"
 
 using namespace std;
 
@@ -9,10 +10,13 @@ DBServer g_app;
 void
 DBServer::initialize()
 {
-    //initialize application here:
-    //...
-
+    // 加载业务自定义配置文件
+    addConfig("GameDemo.DBServer.conf");
+    
+    // DBServant
     addServant<DBImp>(ServerConfig::Application + "." + ServerConfig::ServerName + ".DBObj");
+    // KVServant (Redis)
+    addServant<KVImp>(ServerConfig::Application + "." + ServerConfig::ServerName + ".KVObj");
 }
 /////////////////////////////////////////////////////////////////
 void

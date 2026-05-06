@@ -13,4 +13,7 @@ include_directories(/home/tarsproto/GameDemo/GameDemoBase)
 # 生成 DBServer 服务
 gen_server(GameDemo DBServer)
 
+# 链接 hiredis
+target_link_libraries(DBServer hiredis)
+
 #target_link_libraries(mysqlclient ssl crypto nghttp2-static)
