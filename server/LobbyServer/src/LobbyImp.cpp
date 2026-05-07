@@ -416,6 +416,54 @@ tars::Int32 LobbyImp::registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _c
     return 0;
 }
 
+// ========== 登出 (V0.6) ==========
+
+tars::Int32 LobbyImp::logout(tars::Int64 playerId, tars::Int64 sessionKey, tars::TarsCurrentPtr _current_)
+{
+    TLOG_INFO("LobbyImp::logout playerId=" << playerId << endl);
+
+    try
+    {
+        // 验证 session
+        if (!g_app.validateSession(playerId, sessionKey))
+        {
+            TLOG_ERROR("logout: invalid session, playerId=" << playerId << endl);
+            return ERR_INVALID_SESSION;
+        }
+
+        // 如果在场景中，先通知 SceneServer 离开
+        tars::Int32 sceneId = g_app.getSessionSceneId(playerId);
+        if (sceneId > 0)
+        {
+            if (!_scenePrx)
+            {
+                _scenePrx = Application::getCommunicator()->stringToProxy<GameDemo::SceneServantPrx>(
+                    "GameDemo.SceneServer.SceneObj"
+                );
+            }
+
+            LeaveSceneReq req;
+            req.playerId = playerId;
+            req.sessionKey = sessionKey;
+            req.sceneId = sceneId;
+            LeaveSceneRsp rsp;
+            _scenePrx->leaveScene(req, rsp);
+            TLOG_INFO("logout: leaveScene done, playerId=" << playerId << ", sceneId=" << sceneId << endl);
+        }
+
+        // 清理 Session + 推送连接
+        g_app.removePlayer(playerId);
+
+        TLOG_INFO("logout success, playerId=" << playerId << endl);
+        return 0;
+    }
+    catch (exception& e)
+    {
+        TLOG_ERROR("logout exception: " << e.what() << endl);
+        return ERR_SERVER_BUSY;
+    }
+}
+
 // ============================================================
 // Scene2LobbyPush 实现 (接收 SceneServer 的回调)
 // ============================================================

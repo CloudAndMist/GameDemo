@@ -68,8 +68,8 @@ public:
     // 标记玩家在线（重连恢复）
     void setPlayerOnline(tars::Int64 playerId);
 
-    // 玩家主动离开（彻底清理）
-    void playerLeave(tars::Int64 playerId);
+    // 玩家主动离开（彻底清理 Session + 推送连接）
+    void removePlayer(tars::Int64 playerId);
 
     // 获取所有在线玩家ID
     vector<tars::Int64> getOnlinePlayers();

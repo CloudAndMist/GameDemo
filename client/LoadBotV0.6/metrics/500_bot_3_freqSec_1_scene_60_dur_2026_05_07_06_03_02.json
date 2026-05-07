@@ -1,0 +1,24 @@
+{
+    "timestamp": "2026-05-07T06:04:16",
+    "onlineBots": 500,
+    "scene": 1,
+    "login": {
+        "success": 500,
+        "fail": 0,
+        "avgLatencyMs": 7
+    },
+    "move": {
+        "totalCount": 90000,
+        "avgLatencyMs": 15,
+        "p50LatencyMs": 16,
+        "p99LatencyMs": 31,
+        "maxLatencyMs": 36
+    },
+    "push": {
+        "moveNotify": 930312,
+        "enterNotify": 2631,
+        "leaveNotify": 2558,
+        "offlineNotify": 0,
+        "avgPerBotPerSec": 31.01
+    }
+}

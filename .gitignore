@@ -3,6 +3,9 @@
 build/
 bin/
 
+# TARS 运行时 trace 日志
+*_t_trace_*.log
+
 # Docker 挂载的共享 TARS 文件 (Windows Git 无法处理符号链接)
 server/*/src/GameDemoBase.tars
 server/*/src/GameDemoBase.h

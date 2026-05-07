@@ -92,6 +92,9 @@ module GameDemo
 
         // 注册推送回调 (客户端调用以接收服务器推送)
         int registerPush(long playerId);
+
+        // 登出 (V0.6: 主动退出，清理场景+Session+推送连接)
+        int logout(long playerId, long sessionKey);
     };
 };
 // Note: Scene2LobbyPush 接口定义在 GameDemoBase/Push.tars 中

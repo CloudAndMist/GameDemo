@@ -266,12 +266,19 @@ void LobbyServerApp::setPlayerOnline(tars::Int64 playerId)
     pthread_rwlock_unlock(&_sessionsRwlock);
 }
 
-void LobbyServerApp::playerLeave(tars::Int64 playerId)
+void LobbyServerApp::removePlayer(tars::Int64 playerId)
 {
+    // 清理 Session
     pthread_rwlock_wrlock(&_sessionsRwlock);
     _sessions.erase(playerId);
-    TLOG_INFO("playerLeave playerId=" << playerId << ", remaining=" << _sessions.size() << endl);
+    TLOG_INFO("removePlayer playerId=" << playerId << ", remaining sessions=" << _sessions.size() << endl);
     pthread_rwlock_unlock(&_sessionsRwlock);
+
+    // 清理推送连接
+    pthread_rwlock_wrlock(&_playerCurrentsRwlock);
+    _playerCurrents.erase(playerId);
+    TLOG_INFO("removePlayer playerId=" << playerId << ", remaining currents=" << _playerCurrents.size() << endl);
+    pthread_rwlock_unlock(&_playerCurrentsRwlock);
 }
 
 vector<tars::Int64> LobbyServerApp::getOnlinePlayers()
@@ -388,15 +395,8 @@ void LobbyServerApp::checkHeartbeatTimeout()
             }
         }
         
-        pthread_rwlock_wrlock(&_sessionsRwlock);
-        _sessions.erase(playerId);
-        TLOG_INFO("checkHeartbeatTimeout: playerId=" << playerId << " session cleaned up" << endl);
-        pthread_rwlock_unlock(&_sessionsRwlock);
-        
-        // 清理客户端连接
-        pthread_rwlock_wrlock(&_playerCurrentsRwlock);
-        _playerCurrents.erase(playerId);
-        pthread_rwlock_unlock(&_playerCurrentsRwlock);
+        // 复用 removePlayer 清理 Session + 推送连接
+        removePlayer(playerId);
     }
     
     if (!toOffline.empty() || !toCleanup.empty())

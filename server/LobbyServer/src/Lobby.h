@@ -739,6 +739,11 @@ namespace GameDemo
         virtual void callback_login_exception(tars::Int32 ret)
         { throw std::runtime_error("callback_login_exception() override incorrect."); }
 
+        virtual void callback_logout(tars::Int32 ret)
+        { throw std::runtime_error("callback_logout() override incorrect."); }
+        virtual void callback_logout_exception(tars::Int32 ret)
+        { throw std::runtime_error("callback_logout_exception() override incorrect."); }
+
         virtual void callback_move(tars::Int32 ret,  const GameDemo::MoveRsp& rsp)
         { throw std::runtime_error("callback_move() override incorrect."); }
         virtual void callback_move_exception(tars::Int32 ret)
@@ -777,12 +782,13 @@ namespace GameDemo
                 "heartbeat",
                 "leaveScene",
                 "login",
+                "logout",
                 "move",
                 "registerAccount",
                 "registerPush"
             };
             auto it = _msg_->response->status.find("TARS_FUNC");
-            pair<string*, string*> r = equal_range(__LobbyServant_all, __LobbyServant_all+8, (it==_msg_->response->status.end())?_msg_->request.sFuncName:it->second);
+            pair<string*, string*> r = equal_range(__LobbyServant_all, __LobbyServant_all+9, (it==_msg_->response->status.end())?_msg_->request.sFuncName:it->second);
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __LobbyServant_all)
             {
@@ -1022,6 +1028,50 @@ namespace GameDemo
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
+                        callback_logout_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    tars::Int32 _ret;
+                    _is.read(_ret, 0, true);
+
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "logout", 0, _trace_param_, "");
+                    }
+
+                    CallbackThreadData * pCbtd = CallbackThreadData::getData();
+                    assert(pCbtd != NULL);
+
+                    pCbtd->setResponseContext(_msg_->response->context);
+
+                    callback_logout(_ret);
+
+                    pCbtd->delResponseContext();
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 6:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
                         callback_move_exception(_msg_->response->iRet);
 
                         return _msg_->response->iRet;
@@ -1065,7 +1115,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 6:
+                case 7:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -1112,7 +1162,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 7:
+                case 8:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -1318,6 +1368,35 @@ namespace GameDemo
         tars::Promise< LobbyServantPrxCallbackPromise::PromiseloginPtr > _promise_login;
 
     public:
+        struct Promiselogout: virtual public TC_HandleBase
+        {
+        public:
+            tars::Int32 _ret;
+            map<std::string, std::string> _mRspContext;
+        };
+        
+        typedef tars::TC_AutoPtr< LobbyServantPrxCallbackPromise::Promiselogout > PromiselogoutPtr;
+
+        LobbyServantPrxCallbackPromise(const tars::Promise< LobbyServantPrxCallbackPromise::PromiselogoutPtr > &promise)
+        : _promise_logout(promise)
+        {}
+        
+        virtual void callback_logout(const LobbyServantPrxCallbackPromise::PromiselogoutPtr &ptr)
+        {
+            _promise_logout.setValue(ptr);
+        }
+        virtual void callback_logout_exception(tars::Int32 ret)
+        {
+            std::string str("");
+            str += "Function:logout_exception|Ret:";
+            str += TC_Common::tostr(ret);
+            _promise_logout.setException(tars::copyException(str, ret));
+        }
+
+    protected:
+        tars::Promise< LobbyServantPrxCallbackPromise::PromiselogoutPtr > _promise_logout;
+
+    public:
         struct Promisemove: virtual public TC_HandleBase
         {
         public:
@@ -1416,12 +1495,13 @@ namespace GameDemo
                 "heartbeat",
                 "leaveScene",
                 "login",
+                "logout",
                 "move",
                 "registerAccount",
                 "registerPush"
             };
 
-            pair<string*, string*> r = equal_range(__LobbyServant_all, __LobbyServant_all+8, string(_msg_->request.sFuncName));
+            pair<string*, string*> r = equal_range(__LobbyServant_all, __LobbyServant_all+9, string(_msg_->request.sFuncName));
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __LobbyServant_all)
             {
@@ -1628,6 +1708,45 @@ namespace GameDemo
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
+                        callback_logout_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+
+                    LobbyServantPrxCallbackPromise::PromiselogoutPtr ptr = new LobbyServantPrxCallbackPromise::Promiselogout();
+
+                    try
+                    {
+                        _is.read(ptr->_ret, 0, true);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_logout_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_logout_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    ptr->_mRspContext = _msg_->response->context;
+
+                    callback_logout(ptr);
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 6:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
                         callback_move_exception(_msg_->response->iRet);
 
                         return _msg_->response->iRet;
@@ -1664,7 +1783,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 6:
+                case 7:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -1704,7 +1823,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 7:
+                case 8:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -1770,12 +1889,13 @@ namespace GameDemo
                 "heartbeat",
                 "leaveScene",
                 "login",
+                "logout",
                 "move",
                 "registerAccount",
                 "registerPush"
             };
 
-            pair<string*, string*> r = equal_range(__LobbyServant_all, __LobbyServant_all+8, string(_msg_->request.sFuncName));
+            pair<string*, string*> r = equal_range(__LobbyServant_all, __LobbyServant_all+9, string(_msg_->request.sFuncName));
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __LobbyServant_all)
             {
@@ -1976,6 +2096,43 @@ namespace GameDemo
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
+                        callback_logout_exception(_msg_->response->iRet);
+
+                        return _msg_->response->iRet;
+                    }
+                    tars::TarsInputStream<tars::BufferReader> _is;
+
+                    _is.setBuffer(_msg_->response->sBuffer);
+                    try
+                    {
+                        tars::Int32 _ret;
+                        _is.read(_ret, 0, true);
+
+                        setResponseContext(_msg_->response->context);
+
+                        callback_logout(_ret);
+
+                    }
+                    catch(std::exception &ex)
+                    {
+                        callback_logout_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+                    catch(...)
+                    {
+                        callback_logout_exception(tars::TARSCLIENTDECODEERR);
+
+                        return tars::TARSCLIENTDECODEERR;
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 6:
+                {
+                    if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
+                    {
                         callback_move_exception(_msg_->response->iRet);
 
                         return _msg_->response->iRet;
@@ -2011,7 +2168,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 6:
+                case 7:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -2050,7 +2207,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 7:
+                case 8:
                 {
                     if (_msg_->response->iRet != tars::TARSSERVERSUCCESS)
                     {
@@ -2616,6 +2773,113 @@ namespace GameDemo
             _os.write(req, 1);
             std::map<string, string> _mStatus;
             tars_invoke_async(tars::TARSNORMAL,"login", _os, context, _mStatus, callback, true);
+        }
+
+        tars::Int32 logout(tars::Int64 playerId,tars::Int64 sessionKey,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            _os.write(sessionKey, 2);
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                    _p_->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "logout", 0, _trace_param_, "");
+            }
+
+            std::map<string, string> _mStatus;
+            shared_ptr<tars::ResponsePacket> rep = tars_invoke(tars::TARSNORMAL,"logout", _os, context, _mStatus);
+            if(pResponseContext)
+            {
+                pResponseContext->swap(rep->context);
+            }
+
+            tars::TarsInputStream<tars::BufferReader> _is;
+            _is.setBuffer(rep->sBuffer);
+            tars::Int32 _ret;
+            _is.read(_ret, 0, true);
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CR, _is.size());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CR), TRACE_ANNOTATION_CR, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "logout", 0, _trace_param_, "");
+            }
+
+            return _ret;
+        }
+
+        void async_logout(LobbyServantPrxCallbackPtr callback,tars::Int64 playerId,tars::Int64 sessionKey,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            _os.write(sessionKey, 2);
+            std::map<string, string> _mStatus;
+            ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+            if (_pSptd_ && _pSptd_->_traceCall)
+            {
+                _pSptd_->newSpan();
+                string _trace_param_;
+                int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_CS, _os.getLength());
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                    _p_->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_CS), TRACE_ANNOTATION_CS, ServerConfig::Application + "." + ServerConfig::ServerName, tars_name(), "logout", 0, _trace_param_, "");
+            }
+            tars_invoke_async(tars::TARSNORMAL,"logout", _os, context, _mStatus, callback);
+        }
+        
+        tars::Future< LobbyServantPrxCallbackPromise::PromiselogoutPtr > promise_async_logout(tars::Int64 playerId,tars::Int64 sessionKey,const map<string, string>& context)
+        {
+            tars::Promise< LobbyServantPrxCallbackPromise::PromiselogoutPtr > promise;
+            LobbyServantPrxCallbackPromisePtr callback = new LobbyServantPrxCallbackPromise(promise);
+
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            _os.write(sessionKey, 2);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"logout", _os, context, _mStatus, callback);
+
+            return promise.getFuture();
+        }
+
+        void coro_logout(LobbyServantCoroPrxCallbackPtr callback,tars::Int64 playerId,tars::Int64 sessionKey,const map<string, string>& context = TARS_CONTEXT())
+        {
+            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+            _os.write(playerId, 1);
+            _os.write(sessionKey, 2);
+            std::map<string, string> _mStatus;
+            tars_invoke_async(tars::TARSNORMAL,"logout", _os, context, _mStatus, callback, true);
         }
 
         tars::Int32 move(const GameDemo::MoveReq & req,GameDemo::MoveRsp &rsp,const map<string, string> &context = TARS_CONTEXT(),map<string, string> * pResponseContext = NULL)
@@ -3289,6 +3553,67 @@ namespace GameDemo
             }
         }
 
+        virtual tars::Int32 logout(tars::Int64 playerId,tars::Int64 sessionKey,tars::TarsCurrentPtr _current_) = 0;
+        static void async_response_logout(tars::TarsCurrentPtr _current_, tars::Int32 _ret)
+        {
+            size_t _rsp_len_ = 0;
+            if (_current_->getRequestVersion() == TUPVERSION )
+            {
+                UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                _tarsAttr_.setVersion(_current_->getRequestVersion());
+                _tarsAttr_.put("", _ret);
+                _tarsAttr_.put("tars_ret", _ret);
+
+                vector<char> sTupResponseBuffer;
+                _tarsAttr_.encode(sTupResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sTupResponseBuffer);
+                _rsp_len_ = sTupResponseBuffer.size();
+            }
+            else if (_current_->getRequestVersion() == JSONVERSION)
+            {
+                tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                vector<char> sJsonResponseBuffer;
+                tars::TC_Json::writeValue(_p, sJsonResponseBuffer);
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, sJsonResponseBuffer);
+                _rsp_len_ = sJsonResponseBuffer.size();
+            }
+            else
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _rsp_len_ = _os.getLength();
+                _current_->sendResponse(tars::TARSSERVERSUCCESS, _os);
+            }
+            if (_current_->isTraced())
+            {
+                string _trace_param_;
+                int _trace_param_flag_ = ServantProxyThreadData::needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _current_->getTraceKey(), _rsp_len_);
+                if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                {
+                    tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                    _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                    _trace_param_ = tars::TC_Json::writeValue(_p_);
+                }
+                else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                {
+                    _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                }
+                TARS_TRACE(_current_->getTraceKey(), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "logout", 0, _trace_param_, "");
+            }
+
+        }
+        static void async_response_push_logout(tars::CurrentPtr _current_, tars::Int32 _ret, const map<string, string> &_context = tars::Current::TARS_STATUS())
+        {
+            {
+                tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                _os.write(_ret, 0);
+
+                _current_->sendPushResponse( tars::TARSSERVERSUCCESS ,"logout", _os, _context);
+            }
+        }
+
         virtual tars::Int32 move(const GameDemo::MoveReq & req,GameDemo::MoveRsp &rsp,tars::TarsCurrentPtr _current_) = 0;
         static void async_response_move(tars::TarsCurrentPtr _current_, tars::Int32 _ret, const GameDemo::MoveRsp &rsp)
         {
@@ -3496,12 +3821,13 @@ namespace GameDemo
                 "heartbeat",
                 "leaveScene",
                 "login",
+                "logout",
                 "move",
                 "registerAccount",
                 "registerPush"
             };
 
-            pair<string*, string*> r = equal_range(__GameDemo__LobbyServant_all, __GameDemo__LobbyServant_all+8, _current->getFuncName());
+            pair<string*, string*> r = equal_range(__GameDemo__LobbyServant_all, __GameDemo__LobbyServant_all+9, _current->getFuncName());
             if(r.first == r.second) return tars::TARSSERVERNOFUNCERR;
             switch(r.first - __GameDemo__LobbyServant_all)
             {
@@ -3981,6 +4307,99 @@ namespace GameDemo
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());
+                    tars::Int64 playerId;
+                    tars::Int64 sessionKey;
+                    if (_current->getRequestVersion() == TUPVERSION)
+                    {
+                        UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                        _tarsAttr_.setVersion(_current->getRequestVersion());
+                        _tarsAttr_.decode(_current->getRequestBuffer());
+                        _tarsAttr_.get("playerId", playerId);
+                        _tarsAttr_.get("sessionKey", sessionKey);
+                    }
+                    else if (_current->getRequestVersion() == JSONVERSION)
+                    {
+                        tars::JsonValueObjPtr _jsonPtr = tars::JsonValueObjPtr::dynamicCast(tars::TC_Json::getValue(_current->getRequestBuffer()));
+                        tars::JsonInput::readJson(playerId, _jsonPtr->value["playerId"], true);
+                        tars::JsonInput::readJson(sessionKey, _jsonPtr->value["sessionKey"], true);
+                    }
+                    else
+                    {
+                        _is.read(playerId, 1, true);
+                        _is.read(sessionKey, 2, true);
+                    }
+                    ServantProxyThreadData *_pSptd_ = ServantProxyThreadData::getData();
+                    if (_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        string _trace_param_;
+                        int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SR, _is.size());
+                        if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                        {
+                            tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                            _p_->value["playerId"] = tars::JsonOutput::writeJson(playerId);
+                            _p_->value["sessionKey"] = tars::JsonOutput::writeJson(sessionKey);
+                            _trace_param_ = tars::TC_Json::writeValue(_p_);
+                        }
+                        else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                        {
+                            _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                        }
+                        TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SR), TRACE_ANNOTATION_SR, "", ServerConfig::Application + "." + ServerConfig::ServerName, "logout", 0, _trace_param_, "");
+                    }
+
+                    tars::Int32 _ret = logout(playerId,sessionKey, _current);
+                    if(_current->isResponse())
+                    {
+                        if (_current->getRequestVersion() == TUPVERSION)
+                        {
+                            UniAttribute<tars::BufferWriterVector, tars::BufferReader>  _tarsAttr_;
+                            _tarsAttr_.setVersion(_current->getRequestVersion());
+                            _tarsAttr_.put("", _ret);
+                            _tarsAttr_.put("tars_ret", _ret);
+                            _tarsAttr_.encode(_sResponseBuffer);
+                        }
+                        else if (_current->getRequestVersion() == JSONVERSION)
+                        {
+                            tars::JsonValueObjPtr _p = new tars::JsonValueObj();
+                            _p->value["tars_ret"] = tars::JsonOutput::writeJson(_ret);
+                            tars::TC_Json::writeValue(_p, _sResponseBuffer);
+                        }
+                        else
+                        {
+                            tars::TarsOutputStream<tars::BufferWriterVector> _os;
+                            _os.write(_ret, 0);
+                            _os.swap(_sResponseBuffer);
+                        }
+                        if (_pSptd_ && _pSptd_->_traceCall)
+                        {
+                            string _trace_param_;
+                            int _trace_param_flag_ = _pSptd_->needTraceParam(ServantProxyThreadData::TraceContext::EST_SS, _sResponseBuffer.size());
+                            if (ServantProxyThreadData::TraceContext::ENP_NORMAL == _trace_param_flag_)
+                            {
+                                tars::JsonValueObjPtr _p_ = new tars::JsonValueObj();
+                                _p_->value[""] = tars::JsonOutput::writeJson(_ret);
+                                _trace_param_ = tars::TC_Json::writeValue(_p_);
+                            }
+                            else if(ServantProxyThreadData::TraceContext::ENP_OVERMAXLEN == _trace_param_flag_)
+                            {
+                                _trace_param_ = "{\"trace_param_over_max_len\":true}";
+                            }
+                            TARS_TRACE(_pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS), TRACE_ANNOTATION_SS, "", ServerConfig::Application + "." + ServerConfig::ServerName, "logout", 0, _trace_param_, "");
+                        }
+
+                    }
+                    else if(_pSptd_ && _pSptd_->_traceCall)
+                    {
+                        _current->setTrace(_pSptd_->_traceCall, _pSptd_->getTraceKey(ServantProxyThreadData::TraceContext::EST_SS));
+                    }
+
+                    return tars::TARSSERVERSUCCESS;
+
+                }
+                case 6:
+                {
+                    tars::TarsInputStream<tars::BufferReader> _is;
+                    _is.setBuffer(_current->getRequestBuffer());
                     GameDemo::MoveReq req;
                     GameDemo::MoveRsp rsp;
                     if (_current->getRequestVersion() == TUPVERSION)
@@ -4073,7 +4492,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 6:
+                case 7:
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());
@@ -4169,7 +4588,7 @@ namespace GameDemo
                     return tars::TARSSERVERSUCCESS;
 
                 }
-                case 7:
+                case 8:
                 {
                     tars::TarsInputStream<tars::BufferReader> _is;
                     _is.setBuffer(_current->getRequestBuffer());

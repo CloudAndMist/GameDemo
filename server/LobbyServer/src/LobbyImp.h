@@ -43,6 +43,9 @@ public:
     // 注册推送
     virtual tars::Int32 registerPush(tars::Int64 playerId, tars::TarsCurrentPtr _current_);
 
+    // 登出 (V0.6: 清理场景+Session+推送连接)
+    virtual tars::Int32 logout(tars::Int64 playerId, tars::Int64 sessionKey, tars::TarsCurrentPtr _current_);
+
 private:
     GameDemo::DBServantPrx _dbPrx;
     GameDemo::SceneServantPrx _scenePrx;
