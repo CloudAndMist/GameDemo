@@ -82,7 +82,7 @@ game-demo/
 │   └── TestGameClientV0.4.5/           # V0.4.5 测试客户端
 │       └── src/main.cpp               # Tars RPC 调用 + Push 回调
 │
-└── version_md/                        # 版本迭代文档
+└── version_docs/                        # 版本迭代文档
     ├── 00_项目设计总览.md
     ├── 00_版本迭代规划.md
     ├── V0.1_踩坑.md
