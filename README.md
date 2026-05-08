@@ -76,23 +76,23 @@ game-demo/
 │   │   └── build/
 │   └── DBServer/                      # 数据库服务
 │       ├── src/                       # DBServant + KVServant (Redis)
-│       ├── test/                       # 单元测试
-│       └── init_db.sql                 # 数据库初始化
+│       ├── test/                      # 单元测试
+│       └── init_db.sql                # 数据库初始化
 ├── client/                            # 测试客户端
-│   └── TestGameClientV0.4.5/           # V0.4.5 测试客户端
+│   └── TestGameClientV0.4.5/          # V0.4.5 测试客户端
 │       └── src/main.cpp               # Tars RPC 调用 + Push 回调
 │
-└── version_docs/                        # 版本迭代文档
+└── version_docs/                      # 版本迭代文档
     ├── 00_项目设计总览.md
     ├── 00_版本迭代规划.md
     ├── V0.1_踩坑.md
     ├── V0.1_单Scene最小Demo.md
     ├── V0.2_踩坑.md
-    ├── V0.2_分布式基础架构搭建.md            # PushCallback
+    ├── V0.2_分布式基础架构搭建.md       # PushCallback
     ├── V0.2.5_数据职责边界重构.md
-    ├── V0.3_移动同步增强.md            # AOI
+    ├── V0.3_移动同步增强.md             # AOI
     ├── V0.4_心跳与断线重连.md
-    ├── **V0.4.5_修复playerId&roleId混淆.md**  # 一账户一角色
+    ├── V0.4.5_修复playerId&roleId混淆.md  # 一账户一角色
     ├── V0.5_高频数据持久化.md
     └── V0.6_性能压测.md
 ```

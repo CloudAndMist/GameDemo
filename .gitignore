@@ -2,6 +2,7 @@
 /build_scripts/
 build/
 bin/
+server_docs/
 
 # TARS 运行时 trace 日志
 *_t_trace_*.log
